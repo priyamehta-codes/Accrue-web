@@ -37,10 +37,8 @@ const Sidebar = () => {
     return () => document.body.classList.remove('sidebar-mobile-active');
   }, [mobileOpen]);
 
-  // Swipe-to-open logic
+  // Global Swipe Gestures
   useEffect(() => {
-    if (mobileOpen) return; 
-
     let startX = 0;
     let startY = 0;
 
@@ -50,25 +48,34 @@ const Sidebar = () => {
     };
 
     const handleEnd = (e) => {
-      if (location.pathname !== '/dashboard') return;
-
       const endX = e.changedTouches[0].clientX;
       const endY = e.changedTouches[0].clientY;
       const dx = endX - startX;
       const dy = endY - startY;
 
-      if (dx > 100 && Math.abs(dy) < 50) {
-        setMobileOpen(true);
+      // Vertical movement guard (don't trigger on vertical scrolls)
+      if (Math.abs(dy) > 60) return;
+
+      if (!mobileOpen) {
+        // Swipe Right to Open (starting from left part of screen)
+        if (dx > 80 && startX < 60) {
+          setMobileOpen(true);
+        }
+      } else {
+        // Swipe Left to Close (anywhere on screen when sidebar is open)
+        if (dx < -70) {
+          setMobileOpen(false);
+        }
       }
     };
 
-    document.addEventListener('touchstart', handleStart);
-    document.addEventListener('touchend', handleEnd);
+    document.addEventListener('touchstart', handleStart, { passive: true });
+    document.addEventListener('touchend', handleEnd, { passive: true });
     return () => {
       document.removeEventListener('touchstart', handleStart);
       document.removeEventListener('touchend', handleEnd);
     };
-  }, [mobileOpen, location.pathname]);
+  }, [mobileOpen]);
 
   const handleLogout = () => { logout(); navigate('/login'); };
 
