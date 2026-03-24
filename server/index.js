@@ -14,6 +14,7 @@ const transactionRoutes = require('./routes/transactions');
 const billRoutes = require('./routes/bills');
 const splitRoutes = require('./routes/splits');
 const dashboardRoutes = require('./routes/dashboard');
+const analyticsRoutes = require('./routes/analytics');
 
 const app = express();
 
@@ -54,6 +55,7 @@ app.use('/api/transactions', transactionRoutes);
 app.use('/api/bills', billRoutes);
 app.use('/api/splits', splitRoutes);
 app.use('/api/dashboard', dashboardRoutes);
+app.use('/api/analytics', analyticsRoutes);
 
 // ─── 404 handler ─────────────────────────────────────────────────────────────
 app.use((req, res) => {

@@ -3,7 +3,7 @@ import { NavLink, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import {
   LayoutDashboard, Wallet, ArrowLeftRight, Receipt, Users,
-  LogOut, Menu, X, TrendingUp,
+  LogOut, Menu, X, TrendingUp, BarChart2
 } from 'lucide-react';
 import useCachedFetch from '../hooks/useCachedFetch';
 import { getDashboard, getCachedDashboard } from '../api/dashboard';
@@ -12,6 +12,7 @@ const navItems = [
   { to: '/dashboard',    label: 'Dashboard',    Icon: LayoutDashboard, key: 'dashboard' },
   { to: '/accounts',     label: 'Accounts',     Icon: Wallet,           key: 'accounts'  },
   { to: '/transactions', label: 'Transactions', Icon: ArrowLeftRight,   key: 'transactions' },
+  { to: '/analytics',    label: 'Analytics',    Icon: BarChart2,        key: 'analytics' },
   { to: '/bills',        label: 'Bills',        Icon: Receipt,          key: 'bills'     },
   { to: '/splits',       label: 'Splits',       Icon: Users,            key: 'splits'    },
 ];

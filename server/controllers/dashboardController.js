@@ -24,6 +24,7 @@ const getDashboard = async (req, res) => {
     recentTransactions,
     upcomingBills,
     unsettledSplitsCount,
+    categoryStats,
   ] = await Promise.all([
     // All active accounts with balances
     Account.find({ userId, isArchived: false }),
@@ -55,6 +56,15 @@ const getDashboard = async (req, res) => {
 
     // Count of unsettled splits
     Split.countDocuments({ userId, isSettled: false }),
+
+    // Category breakdown (current month)
+    Transaction.aggregate([
+      { $match: { userId: userObjectId, type: 'expense', date: { $gte: startOfMonth, $lte: endOfMonth } } },
+      { $group: { _id: '$category', value: { $sum: '$amount' } } },
+      { $project: { name: '$_id', value: 1, _id: 0 } },
+      { $sort: { value: -1 } },
+      { $limit: 5 } // Top 5 for dashboard
+    ]),
   ]);
 
   const totalBalance = accounts.reduce((sum, a) => sum + a.balance, 0);
@@ -71,6 +81,7 @@ const getDashboard = async (req, res) => {
     recentTransactions,
     upcomingBills,
     unsettledSplitsCount,
+    categoryData: categoryStats.map(c => ({ name: c.name, value: parseFloat(c.value.toFixed(2)) })),
     month: now.toLocaleString('default', { month: 'long', year: 'numeric' }),
   });
 };

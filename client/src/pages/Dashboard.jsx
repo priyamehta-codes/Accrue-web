@@ -1,8 +1,9 @@
 import React, { useState, useCallback } from 'react';
 import { Link } from 'react-router-dom';
-import { TrendingUp, TrendingDown, Wallet, Users, Receipt, ArrowRight, RefreshCw } from 'lucide-react';
+import { TrendingUp, TrendingDown, Wallet, Users, Receipt, ArrowRight, RefreshCw, PieChart as PieIcon } from 'lucide-react';
 import { motion } from 'framer-motion';
 import styled from 'styled-components';
+import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from 'recharts';
 import Layout from '../components/Layout';
 import Loader from '../components/newloader';
 import useCachedFetch from '../hooks/useCachedFetch';
@@ -18,6 +19,7 @@ const fmtDate = (d) =>
 
 const typeColor = { income: 'var(--success)', expense: 'var(--danger)', transfer: 'var(--accent-light)' };
 const typeSign  = { income: '+', expense: '−', transfer: '' };
+const COLORS = ['#4F46E5', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6', '#EC4899', '#06B6D4'];
 
 
 const StyledStatCard = styled(motion.div)`
@@ -380,6 +382,45 @@ const Dashboard = () => {
             )}
           </div>
         </div>
+
+        {/* Expense Categories Chart (Hoisted for mobile ordering) */}
+        <Link to="/analytics" style={{ textDecoration: 'none' }} className="dashboard-chart-card">
+          <div className="card fade-up" style={{ cursor: 'pointer' }}>
+            <div className="section-header">
+              <span className="section-title">Expense Categories</span>
+              <PieIcon size={16} color="var(--text-3)" />
+            </div>
+            <div style={{ height: 220, width: '100%', marginTop: 10 }}>
+              {d.categoryData?.length > 0 ? (
+                <ResponsiveContainer width="100%" height="100%">
+                  <PieChart>
+                    <Pie
+                      data={d.categoryData}
+                      innerRadius={40}
+                      outerRadius={65}
+                      paddingAngle={5}
+                      dataKey="value"
+                      label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
+                      labelLine={false}
+                    >
+                      {d.categoryData.map((entry, index) => (
+                        <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                      ))}
+                    </Pie>
+                    <Tooltip 
+                      formatter={(val) => fmt(val)}
+                      contentStyle={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--r-md)', fontSize: '0.75rem' }}
+                    />
+                  </PieChart>
+                </ResponsiveContainer>
+              ) : (
+                <div className="empty-state" style={{ padding: '20px' }}>
+                  <p style={{ fontSize: '0.8rem' }}>No expenses yet</p>
+                </div>
+              )}
+            </div>
+          </div>
+        </Link>
 
         {/* Right column */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>

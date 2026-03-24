@@ -1,6 +1,6 @@
 import React, { useState, useCallback } from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
-import { LayoutDashboard, Wallet, ArrowLeftRight, Receipt, Users, Plus, X } from 'lucide-react';
+import { LayoutDashboard, Wallet, ArrowLeftRight, Receipt, Users, Plus, X, BarChart2 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import styled from 'styled-components';
 import Modal from './Modal';
@@ -71,7 +71,8 @@ const FabButton = styled(motion.button)`
 `;
 
 /* ── Categories ─────────────────────────────────────────────────────── */
-const CATEGORIES = ['Food', 'Transport', 'Shopping', 'Entertainment', 'Bills', 'Health', 'Salary', 'Investment', 'Other'];
+const INCOME_CATEGORIES = ['Salary', 'Freelance', 'Refund', 'Gift', 'Other'];
+const EXPENSE_CATEGORIES = ['Food', 'Transport', 'Shopping', 'Entertainment', 'Bills', 'Health', 'Travel', 'Education', 'Other'];
 const EMPTY_FORM = { accountId: '', toAccountId: '', type: 'expense', amount: '', category: 'Food', specifiedCategory: '', note: '', date: new Date().toISOString().slice(0, 10) };
 
 /* ── BottomNav ───────────────────────────────────────────────────────── */
@@ -101,8 +102,8 @@ const BottomNav = ({ onTxAdded }) => {
   };
 
   const navItems = [
-    { to: '/dashboard', label: 'Home',    Icon: LayoutDashboard, key: 'dashboard' },
-    { to: '/accounts',  label: 'Accounts', Icon: Wallet,           key: 'accounts'  },
+    { to: '/dashboard',    label: 'Home',      Icon: LayoutDashboard, key: 'dashboard' },
+    { to: '/analytics',    label: 'Analytics', Icon: BarChart2,        key: 'analytics' },
     null, // FAB placeholder
     { to: '/bills',     label: 'Bills',    Icon: Receipt,          key: 'bills'     },
     { to: '/splits',    label: 'Splits',   Icon: Users,            key: 'splits'    },
@@ -202,7 +203,7 @@ const BottomNav = ({ onTxAdded }) => {
             <label className="form-label">Category</label>
             <select className="form-select" value={form.category}
               onChange={(e) => setForm({ ...form, category: e.target.value })}>
-              {CATEGORIES.map((c) => <option key={c}>{c}</option>)}
+              {(form.type === 'income' ? INCOME_CATEGORIES : EXPENSE_CATEGORIES).map((c) => <option key={c}>{c}</option>)}
             </select>
             {form.category === 'Other' && (
               <input className="form-input" style={{ marginTop: 6 }} value={form.specifiedCategory}
