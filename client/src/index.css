@@ -636,6 +636,11 @@ a:hover { color: var(--accent); }
 .sidebar-mobile-active .mobile-menu-btn {
   display: none !important;
 }
+.recharts-pie-label-text {
+  fill: var(--text-1) !important;
+  font-size: 10px;
+  font-weight: 600;
+}
 .filter-bar {
   display: flex;
   gap: 10px;

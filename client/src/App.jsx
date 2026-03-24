@@ -10,6 +10,7 @@ import Transactions from './pages/Transactions';
 import Bills       from './pages/Bills';
 import Splits      from './pages/Splits';
 import Analytics   from './pages/Analytics';
+import Settings    from './pages/Settings';
 import Landing     from './pages/Landing';
 
 const Home = () => {
@@ -34,6 +35,7 @@ const AppRoutes = () => {
       <Route path="/bills" element={<ProtectedRoute><Bills /></ProtectedRoute>} />
       <Route path="/splits" element={<ProtectedRoute><Splits /></ProtectedRoute>} />
       <Route path="/analytics" element={<ProtectedRoute><Analytics /></ProtectedRoute>} />
+      <Route path="/settings" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
 
       {/* Catch-all */}
       <Route path="*" element={<Navigate to="/" replace />} />

@@ -406,16 +406,11 @@ const Dashboard = () => {
                     <Pie
                       data={d.categoryData}
                       innerRadius={40}
-                      outerRadius={65}
+                      outerRadius={80}
                       paddingAngle={5}
                       dataKey="value"
-                      label={({ name, percent }) => ({
-                        text: `${name} ${(percent * 100).toFixed(0)}%`,
-                        fill: 'var(--text-1)',
-                        fontSize: 10,
-                        fontWeight: 600
-                      })}
-                      labelLine={false}
+                      label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
+                      fill="#8884d8"
                     >
                       {d.categoryData.map((entry, index) => (
                         <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />

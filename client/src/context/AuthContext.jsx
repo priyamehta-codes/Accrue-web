@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
-import { googleLogin, getMe } from '../api/auth';
+import { googleLogin, getMe, updateProfile as apiUpdateProfile } from '../api/auth';
 
 const AuthContext = createContext(null);
 
@@ -54,8 +54,16 @@ export const AuthProvider = ({ children }) => {
     setUser(null);
   }, []);
 
+  const updateUser = useCallback((updatedUser) => {
+    setUser(updatedUser);
+    localStorage.setItem('accrue_user', JSON.stringify(updatedUser));
+  }, []);
+
   return (
-    <AuthContext.Provider value={{ user, token, loading, login, logout, isAuthenticated: !!token }}>
+    <AuthContext.Provider value={{ 
+      user, token, loading, login, logout, updateUser,
+      isAuthenticated: !!token 
+    }}>
       {children}
     </AuthContext.Provider>
   );

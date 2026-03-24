@@ -62,4 +62,33 @@ const getMe = async (req, res) => {
   res.json(user);
 };
 
-module.exports = { googleAuth, getMe };
+/**
+ * PUT /api/auth/profile
+ * Body: { name: string }
+ * Updates current user's display name.
+ */
+const updateProfile = async (req, res) => {
+  const { name } = req.body;
+  if (!name || name.trim().length === 0) {
+    return res.status(400).json({ message: 'Name is required.' });
+  }
+
+  const user = await User.findByIdAndUpdate(
+    req.userId,
+    { name: name.trim() },
+    { new: true }
+  ).select('-__v');
+
+  if (!user) {
+    return res.status(404).json({ message: 'User not found.' });
+  }
+
+  res.json({
+    id: user._id,
+    email: user.email,
+    name: user.name,
+    picture: user.picture,
+  });
+};
+
+module.exports = { googleAuth, getMe, updateProfile };

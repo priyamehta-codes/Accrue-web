@@ -4,18 +4,19 @@ import { useAuth } from '../context/AuthContext';
 import {
   LayoutDashboard, Wallet, ArrowLeftRight, Receipt, Users,
   LogOut, Menu, X, TrendingUp, BarChart2, Github,
-  Sun, Moon
+  Sun, Moon, Settings as SettingsIcon
 } from 'lucide-react';
 import useCachedFetch from '../hooks/useCachedFetch';
 import { getDashboard, getCachedDashboard } from '../api/dashboard';
 
-const navItems = [
-  { to: '/dashboard',    label: 'Dashboard',    Icon: LayoutDashboard, key: 'dashboard' },
-  { to: '/accounts',     label: 'Accounts',     Icon: Wallet,           key: 'accounts'  },
+const routes = [
+  { to: '/dashboard',    label: 'Dashboard',    Icon: LayoutDashboard,  key: 'dashboard' },
   { to: '/transactions', label: 'Transactions', Icon: ArrowLeftRight,   key: 'transactions' },
+  { to: '/accounts',     label: 'Accounts',     Icon: Wallet,           key: 'accounts'  },
   { to: '/analytics',    label: 'Analytics',    Icon: BarChart2,        key: 'analytics' },
   { to: '/bills',        label: 'Bills',        Icon: Receipt,          key: 'bills'     },
   { to: '/splits',       label: 'Splits',       Icon: Users,            key: 'splits'    },
+  { to: '/settings',     label: 'Settings',     Icon: SettingsIcon,     key: 'settings'  },
 ];
 
 const Sidebar = () => {
@@ -23,21 +24,9 @@ const Sidebar = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const [mobileOpen, setMobileOpen] = useState(false);
-  const [isDark, setIsDark] = useState(() => localStorage.getItem('accrue-theme') === 'dark');
-
+  
   const { data } = useCachedFetch(useCallback(getDashboard, []), getCachedDashboard);
   const d = data || {};
-
-  useEffect(() => {
-    const root = document.documentElement;
-    if (isDark) {
-      root.setAttribute('data-theme', 'dark');
-      localStorage.setItem('accrue-theme', 'dark');
-    } else {
-      root.setAttribute('data-theme', 'light');
-      localStorage.setItem('accrue-theme', 'light');
-    }
-  }, [isDark]);
 
   useEffect(() => {
     if (mobileOpen) {
@@ -50,7 +39,7 @@ const Sidebar = () => {
 
   // Swipe-to-open logic
   useEffect(() => {
-    if (mobileOpen) return; // Only listen if closed
+    if (mobileOpen) return; 
 
     let startX = 0;
     let startY = 0;
@@ -68,7 +57,6 @@ const Sidebar = () => {
       const dx = endX - startX;
       const dy = endY - startY;
 
-      // Threshold: Swipe right > 100px, mostly horizontal
       if (dx > 100 && Math.abs(dy) < 50) {
         setMobileOpen(true);
       }
@@ -86,7 +74,6 @@ const Sidebar = () => {
 
   return (
     <>
-      {/* Mobile toggle */}
       <button
         className="mobile-menu-btn"
         onClick={() => setMobileOpen(!mobileOpen)}
@@ -95,28 +82,18 @@ const Sidebar = () => {
         {mobileOpen ? null : <Menu size={22} />}
       </button>
 
-      {/* Backdrop */}
       {mobileOpen && (
         <div className="sidebar-backdrop" onClick={() => setMobileOpen(false)} />
       )}
 
       <aside className={`sidebar ${mobileOpen ? 'sidebar-open' : ''}`}>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', paddingRight: '8px' }}>
-          {/* Logo */}
           <NavLink to="/" style={{ textDecoration: 'none' }} className="sidebar-logo">
             <div className="logo-icon"><TrendingUp size={20} /></div>
             <span className="logo-text">Accrue</span>
           </NavLink>
           
-          <div style={{ display: 'flex', gap: '8px' }}>
-            <button 
-              className="theme-toggle" 
-              onClick={() => setIsDark(!isDark)}
-              aria-label="Toggle theme"
-            >
-              {isDark ? <Sun size={18} /> : <Moon size={18} />}
-            </button>
-
+          <div style={{ display: 'flex', gap: '4px' }}>
             {mobileOpen && (
               <button className="mobile-close-btn" onClick={() => setMobileOpen(false)}>
                 <X size={22} />
@@ -127,9 +104,8 @@ const Sidebar = () => {
 
         <div className="sidebar-divider" />
 
-        {/* Nav */}
         <nav className="sidebar-nav">
-          {navItems.map(({ to, label, Icon, key }) => {
+          {routes.map(({ to, label, Icon, key }) => {
             const hasDot = key === 'bills' ? (d.upcomingBills?.length > 0) : key === 'splits' ? (d.unsettledSplitsCount > 0) : false;
             return (
               <NavLink
@@ -158,7 +134,6 @@ const Sidebar = () => {
 
         <div className="sidebar-footer">
           <div className="sidebar-divider" />
-          {/* User info */}
           {user && (
             <div className="sidebar-user">
               {user.picture
@@ -225,10 +200,7 @@ const Sidebar = () => {
           transition: all var(--transition);
           text-decoration: none;
         }
-        .sidebar-link:hover {
-          background: var(--bg-hover);
-          color: var(--text-1);
-        }
+        .sidebar-link:hover { background: var(--bg-hover); color: var(--text-1); }
         .sidebar-link-active {
           background: var(--accent-dim);
           color: var(--accent-light);
@@ -270,22 +242,6 @@ const Sidebar = () => {
           opacity: 0.7; transition: opacity var(--transition);
         }
         .sidebar-github:hover { opacity: 1; color: var(--text-1); }
-
-        .theme-toggle {
-          width: 36px; height: 36px;
-          display: flex; align-items: center; justify-content: center;
-          border-radius: var(--r-md);
-          background: var(--bg-overlay);
-          border: 1px solid var(--border);
-          color: var(--text-2);
-          cursor: pointer;
-          transition: all var(--transition);
-        }
-        .theme-toggle:hover {
-          background: var(--bg-hover);
-          color: var(--accent-light);
-          border-color: var(--accent-dim);
-        }
 
         /* Mobile */
         .mobile-menu-btn {
