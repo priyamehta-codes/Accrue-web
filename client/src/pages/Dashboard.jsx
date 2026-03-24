@@ -43,7 +43,7 @@ const StyledStatCard = styled(motion.div)`
     position: absolute;
     top: 0; left: 0; right: 0;
     height: 3px;
-    background: linear-gradient(90deg, ${(props) => props.themeColor || 'var(--accent)'}, transparent);
+    background: linear-gradient(90deg, ${(props) => props.$themeColor || 'var(--accent)'}, transparent);
     opacity: 0.8;
   }
 
@@ -70,15 +70,15 @@ const StyledStatCard = styled(motion.div)`
     display: flex;
     align-items: center;
     justify-content: center;
-    background: ${(props) => props.iconBg || 'var(--accent-dim)'};
-    color: ${(props) => props.themeColor || 'var(--accent)'};
+    background: ${(props) => props.$iconBg || 'var(--accent-dim)'};
+    color: ${(props) => props.$themeColor || 'var(--accent)'};
   }
 `;
 
 const StatCard = ({ label, value, Icon, iconBg, color, delay }) => (
   <StyledStatCard 
-    themeColor={color}
-    iconBg={iconBg}
+    $themeColor={color}
+    $iconBg={iconBg}
     initial={{ opacity: 0, y: 20 }}
     animate={{ opacity: 1, y: 0 }}
     transition={{ delay: delay * 0.1, duration: 0.4 }}

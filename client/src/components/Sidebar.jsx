@@ -7,7 +7,7 @@ import {
 } from 'lucide-react';
 
 const navItems = [
-  { to: '/',             label: 'Dashboard',    Icon: LayoutDashboard },
+  { to: '/dashboard',    label: 'Dashboard',    Icon: LayoutDashboard },
   { to: '/accounts',     label: 'Accounts',     Icon: Wallet           },
   { to: '/transactions', label: 'Transactions', Icon: ArrowLeftRight   },
   { to: '/bills',        label: 'Bills',        Icon: Receipt          },
@@ -59,7 +59,7 @@ const Sidebar = () => {
             <NavLink
               key={to}
               to={to}
-              end={to === '/'}
+              end={to === '/dashboard'}
               className={({ isActive }) => `sidebar-link ${isActive ? 'sidebar-link-active' : ''}`}
               onClick={() => setMobileOpen(false)}
             >

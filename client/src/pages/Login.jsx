@@ -87,7 +87,7 @@ const Login = () => {
         }
         .login-title {
           font-size: 2.2rem; font-weight: 800;
-          background: linear-gradient(135deg, #fff 40%, var(--accent-light));
+          background: linear-gradient(135deg, var(--text-1) 20%, var(--accent));
           -webkit-background-clip: text; -webkit-text-fill-color: transparent;
         }
         .login-tagline { color: var(--text-3); font-size: 0.9rem; }
