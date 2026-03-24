@@ -58,6 +58,32 @@
   --transition:  0.2s cubic-bezier(0.4,0,0.2,1);
 }
 
+/* ── Dark Mode Toggle ───────────────────────────────────────────────────────── */
+[data-theme='dark'] {
+  --bg-base:     #0F172A;
+  --bg-surface:  #1E293B;
+  --bg-elevated: #334155;
+  --bg-overlay:  #1E293B;
+  --bg-hover:    rgba(255,255,255,0.06);
+
+  --accent:         #6366F1;
+  --accent-hover:   #818CF8;
+  --accent-light:   #818CF8;
+  --accent-dim:     rgba(99,102,241,0.2);
+  --accent-glow:    0 0 20px rgba(99,102,241,0.3);
+
+  --text-1: #F8FAFC;
+  --text-2: #E2E8F0;
+  --text-3: #94A3B8;
+
+  --border:       rgba(255,255,255,0.08);
+  --border-hover: rgba(255,255,255,0.15);
+
+  --shadow-sm: 0 1px 3px rgba(0,0,0,0.3);
+  --shadow-md: 0 4px 12px rgba(0,0,0,0.4);
+  --shadow-lg: 0 12px 32px rgba(0,0,0,0.5);
+}
+
 /* ── Reset ──────────────────────────────────────────────────────────────────── */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -603,8 +629,13 @@ a:hover { color: var(--accent); }
 @media (max-width: 768px) {
   .dashboard-grid { gap: 16px; }
 }
-
-/* ── Filter Bar ─────────────────────────────────────────────────────────────── */
+/* ── Navbar Fix ────────────────────────────────────────────────────────────── */
+.sidebar-mobile-active .bottom-nav {
+  display: none !important;
+}
+.sidebar-mobile-active .mobile-menu-btn {
+  display: none !important;
+}
 .filter-bar {
   display: flex;
   gap: 10px;
