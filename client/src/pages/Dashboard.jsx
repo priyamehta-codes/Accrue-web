@@ -8,6 +8,7 @@ import Layout from '../components/Layout';
 import Loader from '../components/newloader';
 import useCachedFetch from '../hooks/useCachedFetch';
 import usePolling from '../hooks/usePolling';
+import { useAuth } from '../context/AuthContext';
 import { getDashboard, getCachedDashboard } from '../api/dashboard';
 import { createTransaction } from '../api/transactions';
 
@@ -20,6 +21,13 @@ const fmtDate = (d) =>
 const typeColor = { income: 'var(--success)', expense: 'var(--danger)', transfer: 'var(--accent-light)' };
 const typeSign  = { income: '+', expense: '−', transfer: '' };
 const COLORS = ['#4F46E5', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6', '#EC4899', '#06B6D4'];
+
+const getGreeting = () => {
+  const hour = new Date().getHours();
+  if (hour < 12) return 'Good Morning';
+  if (hour < 17) return 'Good Afternoon';
+  return 'Good Evening';
+};
 
 
 const StyledStatCard = styled(motion.div)`
@@ -261,6 +269,7 @@ const StatSideStack = styled.div`
 `;
 
 const Dashboard = () => {
+  const { user } = useAuth();
   const fetch = useCallback(getDashboard, []);
   const { data, isLoading, error, isSyncing, refresh } = useCachedFetch(fetch, getCachedDashboard);
   const [txForm, setTxForm] = React.useState(EMPTY_TX_FORM);
@@ -287,7 +296,7 @@ const Dashboard = () => {
     <Layout onTxAdded={refresh}>
       <div className="page-header">
         <div>
-          <h1 className="page-title">Dashboard</h1>
+          <h1 className="page-title">{getGreeting()}, {user?.name?.split(' ')[0] || 'User'}</h1>
           <p className="page-subtitle">{d.month} overview</p>
         </div>
         <button className="btn btn-secondary btn-sm" onClick={refresh} disabled={isSyncing}>
