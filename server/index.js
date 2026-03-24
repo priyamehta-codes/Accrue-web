@@ -20,9 +20,20 @@ const app = express();
 // Connect to MongoDB
 connectDB();
 
-// ─── Middleware ───────────────────────────────────────────────────────────────
+// Build list of allowed origins from env (strip trailing slashes to avoid
+// the common "has trailing slash" vs "no trailing slash" CORS mismatch).
+const allowedOrigins = (process.env.CLIENT_ORIGIN || 'http://localhost:5173')
+  .split(',')
+  .map((o) => o.trim().replace(/\/$/, ''));
+
 app.use(cors({
-  origin: process.env.CLIENT_ORIGIN,
+  origin: (origin, cb) => {
+    // Allow server-to-server / Postman (no origin header)
+    if (!origin) return cb(null, true);
+    const normalized = origin.replace(/\/$/, '');
+    if (allowedOrigins.includes(normalized)) return cb(null, true);
+    cb(new Error(`CORS: origin ${origin} not allowed`));
+  },
   methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization'],
   credentials: true,
