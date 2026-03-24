@@ -123,7 +123,7 @@ const Dashboard = () => {
   const savingsColor = d.savingsRate >= 0 ? 'var(--success)' : 'var(--danger)';
 
   return (
-    <Layout>
+    <Layout onTxAdded={refresh}>
       <div className="page-header">
         <div>
           <h1 className="page-title">Dashboard</h1>

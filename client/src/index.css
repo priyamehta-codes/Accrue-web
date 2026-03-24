@@ -369,6 +369,8 @@ a:hover { color: var(--accent); }
   border-radius: var(--r-md);
   transition: background var(--transition);
   cursor: default;
+  min-width: 0; /* critical: allows children to shrink */
+  overflow: hidden;
 }
 
 .tx-item:hover { background: var(--bg-hover); }
@@ -383,7 +385,7 @@ a:hover { color: var(--accent); }
   font-size: 1.1rem;
 }
 
-.tx-info { flex: 1; min-width: 0; }
+.tx-info { flex: 1; min-width: 0; overflow: hidden; }
 
 .tx-title {
   font-weight: 600;
@@ -397,12 +399,16 @@ a:hover { color: var(--accent); }
   font-size: 0.78rem;
   color: var(--text-3);
   margin-top: 2px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .tx-amount {
   font-size: 1rem;
   font-weight: 700;
   white-space: nowrap;
+  flex-shrink: 0;
 }
 
 .amount-income   { color: var(--success); }
