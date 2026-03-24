@@ -54,16 +54,18 @@ const Sidebar = () => {
       const dy = endY - startY;
 
       // Vertical movement guard (don't trigger on vertical scrolls)
-      if (Math.abs(dy) > 60) return;
+      if (Math.abs(dy) > 50) return;
+      // Ensure horizontal dominance
+      if (Math.abs(dx) < Math.abs(dy) * 1.5) return;
 
       if (!mobileOpen) {
-        // Swipe Right to Open (starting from left part of screen)
-        if (dx > 80 && startX < 60) {
+        // Swipe Right to Open (from anywhere, matching original dashboard behavior)
+        if (dx > 100) {
           setMobileOpen(true);
         }
       } else {
-        // Swipe Left to Close (anywhere on screen when sidebar is open)
-        if (dx < -70) {
+        // Swipe Left to Close
+        if (dx < -80) {
           setMobileOpen(false);
         }
       }
