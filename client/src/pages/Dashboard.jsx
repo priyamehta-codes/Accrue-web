@@ -1,6 +1,7 @@
 import React, { useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import { TrendingUp, TrendingDown, Wallet, Users, Receipt, ArrowRight, RefreshCw } from 'lucide-react';
+import { motion } from 'framer-motion';
 import Layout from '../components/Layout';
 import useCachedFetch from '../hooks/useCachedFetch';
 import usePolling from '../hooks/usePolling';
@@ -16,17 +17,81 @@ const fmtDate = (d) =>
 const typeColor = { income: 'var(--success)', expense: 'var(--danger)', transfer: 'var(--accent-light)' };
 const typeSign  = { income: '+', expense: '−', transfer: '' };
 
+import styled from 'styled-components';
+
+const StyledStatCard = styled(motion.div)`
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r-lg);
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  position: relative;
+  overflow: hidden;
+  box-shadow: var(--shadow-sm);
+  transition: transform var(--transition), box-shadow var(--transition);
+
+  &:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-md);
+    border-color: var(--border-hover);
+  }
+
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, ${(props) => props.themeColor || 'var(--accent)'}, transparent);
+    opacity: 0.8;
+  }
+
+  .label {
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--text-3);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+
+  .value {
+    font-size: 2.2rem;
+    font-weight: 800;
+    line-height: 1;
+    color: var(--text-1);
+  }
+
+  .icon-wrapper {
+    position: absolute;
+    top: 20px; right: 20px;
+    width: 44px; height: 44px;
+    border-radius: var(--r-md);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: ${(props) => props.iconBg || 'var(--accent-dim)'};
+    color: ${(props) => props.themeColor || 'var(--accent)'};
+  }
+`;
+
 const StatCard = ({ label, value, Icon, iconBg, color, delay }) => (
-  <div className={`stat-card fade-up fade-up-delay-${delay}`}>
-    <span className="stat-label">{label}</span>
-    <span className="stat-value" style={{ color }}>{value}</span>
-    <div className="stat-icon" style={{ background: iconBg }}>
-      <Icon size={18} style={{ color }} />
+  <StyledStatCard 
+    themeColor={color}
+    iconBg={iconBg}
+    initial={{ opacity: 0, y: 20 }}
+    animate={{ opacity: 1, y: 0 }}
+    transition={{ delay: delay * 0.1, duration: 0.4 }}
+  >
+    <span className="label">{label}</span>
+    <span className="value" style={{ color }}>{value}</span>
+    <div className="icon-wrapper">
+      <Icon size={20} />
     </div>
-  </div>
+  </StyledStatCard>
 );
 
-const EMPTY_TX_FORM = { accountId: '', toAccountId: '', type: 'expense', amount: '', category: 'Other', note: '', date: new Date().toISOString().slice(0, 10) };
+const EMPTY_TX_FORM = { accountId: '', toAccountId: '', type: 'expense', amount: '', category: 'Other', specifiedCategory: '', note: '', date: new Date().toISOString().slice(0, 10) };
 
 const CATEGORIES = ['Food', 'Transport', 'Shopping', 'Entertainment', 'Bills', 'Health', 'Salary', 'Investment', 'Transfer', 'Other'];
 
@@ -43,7 +108,8 @@ const Dashboard = () => {
     e.preventDefault();
     setSavingTx(true);
     try {
-      await createTransaction({ ...txForm, amount: parseFloat(txForm.amount) });
+      const finalCategory = (txForm.category === 'Other' && txForm.specifiedCategory.trim() !== '') ? txForm.specifiedCategory : txForm.category;
+      await createTransaction({ ...txForm, category: finalCategory, amount: parseFloat(txForm.amount) });
       setTxForm(EMPTY_TX_FORM);
       refresh(); // Instant sync
     } catch (err) { console.error(err); }
@@ -111,6 +177,9 @@ const Dashboard = () => {
                 <select className="form-select" style={{ flex: 1 }} value={txForm.category} onChange={(e) => setTxForm({ ...txForm, category: e.target.value })}>
                   {CATEGORIES.map((c) => <option key={c}>{c}</option>)}
                 </select>
+                {txForm.category === 'Other' && (
+                  <input className="form-input" style={{ flex: 1 }} value={txForm.specifiedCategory} onChange={(e) => setTxForm({ ...txForm, specifiedCategory: e.target.value })} placeholder="Please specify (optional)" />
+                )}
                 <input className="form-input" style={{ flex: 1 }} value={txForm.note} onChange={(e) => setTxForm({ ...txForm, note: e.target.value })} placeholder="Note" />
               </div>
               <button type="submit" className="btn btn-primary" style={{ width: '100%', justifyContent: 'center' }} disabled={savingTx}>

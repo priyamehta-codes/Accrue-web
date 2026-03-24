@@ -15,7 +15,7 @@ const CATEGORIES = ['Food', 'Transport', 'Shopping', 'Entertainment', 'Bills', '
 const typeColor = { income: 'var(--success)', expense: 'var(--danger)', transfer: 'var(--accent-light)' };
 const typeSign  = { income: '+', expense: '−', transfer: '' };
 
-const EMPTY_FORM = { accountId: '', toAccountId: '', type: 'expense', amount: '', category: 'Other', note: '', date: new Date().toISOString().slice(0, 10) };
+const EMPTY_FORM = { accountId: '', toAccountId: '', type: 'expense', amount: '', category: 'Other', specifiedCategory: '', note: '', date: new Date().toISOString().slice(0, 10) };
 
 const Transactions = () => {
   const fetchTx = useCallback(getTransactions, []);
@@ -43,7 +43,8 @@ const Transactions = () => {
     e.preventDefault();
     setSaving(true);
     try {
-      await createTransaction({ ...form, amount: parseFloat(form.amount) });
+      const finalCategory = (form.category === 'Other' && form.specifiedCategory.trim() !== '') ? form.specifiedCategory : form.category;
+      await createTransaction({ ...form, category: finalCategory, amount: parseFloat(form.amount) });
       setModal(false);
       setForm(EMPTY_FORM);
       refresh();
@@ -162,11 +163,16 @@ const Transactions = () => {
           )}
 
           <div className="form-grid">
-            <div className="form-group">
+            <div className="form-group" style={{ flex: 1 }}>
               <label className="form-label">Category</label>
-              <select className="form-select" value={form.category} onChange={(e) => setForm({ ...form, category: e.target.value })}>
-                {CATEGORIES.map((c) => <option key={c}>{c}</option>)}
-              </select>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                <select className="form-select" value={form.category} onChange={(e) => setForm({ ...form, category: e.target.value })}>
+                  {CATEGORIES.map((c) => <option key={c}>{c}</option>)}
+                </select>
+                {form.category === 'Other' && (
+                  <input className="form-input" value={form.specifiedCategory} onChange={(e) => setForm({ ...form, specifiedCategory: e.target.value })} placeholder="Please specify (optional)" />
+                )}
+              </div>
             </div>
             <div className="form-group">
               <label className="form-label">Note</label>

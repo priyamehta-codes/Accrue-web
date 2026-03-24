@@ -1,3 +1,4 @@
+const mongoose = require('mongoose');
 const Account = require('../models/Account');
 const Transaction = require('../models/Transaction');
 const Bill = require('../models/Bill');
@@ -6,6 +7,8 @@ const Split = require('../models/Split');
 // GET /api/dashboard
 const getDashboard = async (req, res) => {
   const userId = req.userId;
+  // Mongoose aggregate pipelines do not auto-cast strings to ObjectIds!
+  const userObjectId = new mongoose.Types.ObjectId(userId);
 
   const now = new Date();
   const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
@@ -26,13 +29,13 @@ const getDashboard = async (req, res) => {
 
     // Sum of income this month
     Transaction.aggregate([
-      { $match: { userId, type: 'income', date: { $gte: startOfMonth, $lte: endOfMonth } } },
+      { $match: { userId: userObjectId, type: 'income', date: { $gte: startOfMonth, $lte: endOfMonth } } },
       { $group: { _id: null, total: { $sum: '$amount' } } },
     ]),
 
     // Sum of expenses this month
     Transaction.aggregate([
-      { $match: { userId, type: 'expense', date: { $gte: startOfMonth, $lte: endOfMonth } } },
+      { $match: { userId: userObjectId, type: 'expense', date: { $gte: startOfMonth, $lte: endOfMonth } } },
       { $group: { _id: null, total: { $sum: '$amount' } } },
     ]),
 

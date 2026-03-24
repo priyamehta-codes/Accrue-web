@@ -107,8 +107,7 @@ a:hover { color: var(--accent); }
 @media (max-width: 768px) {
   .main-content {
     margin-left: 0;
-    padding: 16px;
-    padding-bottom: 80px; /* Bottom nav */
+    padding: 64px 16px 80px 16px; /* Top padding protects from hamburger button */
   }
 }
 

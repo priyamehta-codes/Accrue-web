@@ -29,7 +29,7 @@ const Sidebar = () => {
         onClick={() => setMobileOpen(!mobileOpen)}
         aria-label="Toggle navigation"
       >
-        {mobileOpen ? <X size={22} /> : <Menu size={22} />}
+        {mobileOpen ? null : <Menu size={22} />}
       </button>
 
       {/* Backdrop */}
@@ -38,11 +38,18 @@ const Sidebar = () => {
       )}
 
       <aside className={`sidebar ${mobileOpen ? 'sidebar-open' : ''}`}>
-        {/* Logo */}
-        <NavLink to="/" style={{ textDecoration: 'none' }} className="sidebar-logo">
-          <div className="logo-icon"><TrendingUp size={20} /></div>
-          <span className="logo-text">Accrue</span>
-        </NavLink>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', paddingRight: '8px' }}>
+          {/* Logo */}
+          <NavLink to="/" style={{ textDecoration: 'none' }} className="sidebar-logo">
+            <div className="logo-icon"><TrendingUp size={20} /></div>
+            <span className="logo-text">Accrue</span>
+          </NavLink>
+          {mobileOpen && (
+            <button className="mobile-close-btn" onClick={() => setMobileOpen(false)}>
+              <X size={22} />
+            </button>
+          )}
+        </div>
 
         <div className="sidebar-divider" />
 
@@ -178,8 +185,14 @@ const Sidebar = () => {
           position: fixed; inset: 0; background: rgba(0,0,0,0.6);
           backdrop-filter: blur(4px); z-index: 99;
         }
+        .mobile-close-btn {
+          display: none;
+          background: transparent; border: none;
+          color: var(--text-1); cursor: pointer; padding: 4px;
+        }
         @media (max-width: 768px) {
           .mobile-menu-btn { display: flex; align-items: center; }
+          .mobile-close-btn { display: flex; align-items: center; }
           .sidebar-backdrop { display: block; }
           .sidebar { transform: translateX(-100%); }
           .sidebar-open { transform: translateX(0); box-shadow: var(--shadow-lg); }
