@@ -101,6 +101,127 @@ const StyledStatCard = styled(motion.div)`
   }
 `;
 
+const StyledSavingsCard = styled(motion.div)`
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r-lg);
+  padding: 32px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  box-shadow: var(--shadow-sm);
+  grid-column: span 2;
+
+  @media (max-width: 768px) {
+    padding: 20px;
+    grid-column: 1 / -1;
+  }
+
+  .header {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .month-title {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--text-3);
+  }
+
+  .savings-amount {
+    font-size: 2.8rem;
+    font-weight: 800;
+    color: var(--text-1);
+    letter-spacing: -0.02em;
+    line-height: 1.1;
+  }
+
+  .progress-row {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    width: 100%;
+  }
+
+  .pill {
+    padding: 6px 20px;
+    border-radius: var(--r-full);
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: #fff;
+    min-width: 100px;
+    text-align: center;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  }
+
+  .pill.earned { background: #0EA5E9; }
+  .pill.spend { background: #F43F5E; }
+
+  .bar-wrapper {
+    flex: 1;
+    height: 32px;
+    background: var(--bg-base);
+    border-radius: var(--r-full);
+    overflow: hidden;
+    position: relative;
+  }
+
+  .bar-fill {
+    height: 100%;
+    border-radius: var(--r-full);
+    transition: width 1s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .bar-fill.earned { background: #0EA5E9; opacity: 0.2; width: 100%; }
+  .bar-fill.spend { background: #F43F5E; }
+
+  .row-amount {
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--text-2);
+    min-width: 100px;
+    text-align: right;
+  }
+`;
+
+const SavingsCard = ({ month, totalBalance, earned, spend, currencyFmt, delay }) => {
+  // Available Balance is the overall total. We'll show it relative to earnings or just a full bar if > earnings.
+  const balanceWidth = Math.min((totalBalance / (earned || 1)) * 100, 100);
+  
+  return (
+    <StyledSavingsCard
+      initial={{ opacity: 0, scale: 0.95 }}
+      animate={{ opacity: 1, scale: 1 }}
+      transition={{ delay: delay * 0.1, duration: 0.5 }}
+      style={{ gridColumn: '1 / -1' }}
+    >
+      <Link to="/transactions?type=expense" style={{ textDecoration: 'none' }} className="header">
+        <span className="month-title">{month} Total Expense</span>
+        <h2 className="savings-amount" style={{ color: 'var(--danger)' }}>{currencyFmt(spend)}</h2>
+      </Link>
+
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+        <Link to="/transactions?type=income" style={{ textDecoration: 'none' }} className="progress-row">
+          <div className="pill earned">Earnings</div>
+          <div className="bar-wrapper">
+            <div className="bar-fill earned" style={{ width: '100%', opacity: 0.2 }} />
+          </div>
+          <span className="row-amount">{currencyFmt(earned)}</span>
+        </Link>
+
+        <Link to="/accounts" style={{ textDecoration: 'none' }} className="progress-row">
+          <div className="pill" style={{ background: 'var(--success)' }}>Available Balance</div>
+          <div className="bar-wrapper">
+            <div className="bar-fill" style={{ width: `${balanceWidth}%`, background: 'var(--success)' }} />
+          </div>
+          <span className="row-amount">{currencyFmt(totalBalance)}</span>
+        </Link>
+      </div>
+    </StyledSavingsCard>
+  );
+};
+
 const StatCard = ({ label, value, Icon, iconBg, color, delay, to }) => (
   <Link to={to} style={{ textDecoration: 'none', display: 'block' }}>
     <StyledStatCard 
@@ -110,7 +231,7 @@ const StatCard = ({ label, value, Icon, iconBg, color, delay, to }) => (
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: delay * 0.1, duration: 0.4 }}
-      style={{ cursor: 'pointer' }}
+      style={{ cursor: 'pointer', height: '100%' }}
     >
       <span className="label">{label}</span>
       <span className="value" style={{ color }}>{value}</span>
@@ -124,6 +245,16 @@ const StatCard = ({ label, value, Icon, iconBg, color, delay, to }) => (
 const EMPTY_TX_FORM = { accountId: '', toAccountId: '', type: 'expense', amount: '', category: 'Food', specifiedCategory: '', note: '', date: new Date().toISOString().slice(0, 10) };
 
 const CATEGORIES = ['Food', 'Transport', 'Shopping', 'Entertainment', 'Bills', 'Health', 'Salary', 'Investment', 'Other'];
+
+const StatSideStack = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+
+  @media (max-width: 768px) {
+    grid-column: 1 / -1;
+  }
+`;
 
 const Dashboard = () => {
   const fetch = useCallback(getDashboard, []);
@@ -162,10 +293,15 @@ const Dashboard = () => {
       </div>
 
       {/* Stats */}
-      <div className="stat-grid">
-        <StatCard label="Total Balance"    value={fmt(d.totalBalance)}    Icon={Wallet}      iconBg="var(--accent-dim)"  color="var(--text-1)"     delay={1} to="/accounts" />
-        <StatCard label="Monthly Income"   value={fmt(d.monthlyIncome)}   Icon={TrendingUp}  iconBg="var(--success-dim)" color="var(--success)"    delay={2} to="/transactions?type=income" />
-        <StatCard label="Monthly Expenses" value={fmt(d.monthlyExpense)}  Icon={TrendingDown} iconBg="var(--danger-dim)" color="var(--danger)"     delay={3} to="/transactions?type=expense" />
+      <div className="stat-grid" style={{ gridTemplateColumns: '1fr' }}>
+        <SavingsCard 
+          month={d.month} 
+          totalBalance={d.totalBalance}
+          earned={d.monthlyIncome} 
+          spend={d.monthlyExpense} 
+          currencyFmt={fmt}
+          delay={1}
+        />
       </div>
 
       <div className="dashboard-grid">

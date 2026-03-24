@@ -30,7 +30,8 @@ const createSplit = async (req, res) => {
       category: type === 'split' ? 'Split' : type === 'lend' ? 'Lending' : 'Borrowing',
       note: `${description} (${type})`,
       date: new Date(),
-      reference: 'split_settlement',
+      reference: 'split_payment',
+      referenceId: null, // Will update after split creation
     });
 
     const delta = txType === 'income' ? totalAmount : -totalAmount;
@@ -50,6 +51,11 @@ const createSplit = async (req, res) => {
     initialTransactionId,
   });
 
+  // Link the initial transaction to the split
+  if (initialTransactionId) {
+    await Transaction.updateOne({ _id: initialTransactionId }, { referenceId: split._id });
+  }
+
   res.status(201).json(split);
 };
 
@@ -64,6 +70,7 @@ const settleParticipant = async (req, res) => {
   if (participant.isPaid) return res.status(400).json({ message: 'Participant already settled.' });
 
   const txType = split.type === 'borrow' ? 'expense' : 'income';
+  const { accountId } = req.body;
 
   let transaction = null;
   if (accountId) {
@@ -115,7 +122,7 @@ const deleteSplit = async (req, res) => {
   const split = await Split.findOne({ _id: req.params.id, userId: req.userId });
   if (!split) return res.status(404).json({ message: 'Split not found.' });
 
-  // If there's an initial transaction, remove it too
+  // 1. Double check: Initial Transaction (the full expense/income)
   if (split.initialTransactionId) {
     const tx = await Transaction.findOne({ _id: split.initialTransactionId, userId: req.userId });
     if (tx) {
@@ -129,8 +136,20 @@ const deleteSplit = async (req, res) => {
     }
   }
 
+  // 2. NEW: Find and delete all SETTLEMENTS (participant payments)
+  const settlements = await Transaction.find({ referenceId: split._id, userId: req.userId });
+  for (const st of settlements) {
+    const delta = st.type === 'income' ? -st.amount : st.amount;
+    try {
+      await applyBalanceDelta(st.accountId, req.userId, delta);
+      await st.deleteOne();
+    } catch (err) {
+      console.error('Failed to reverse settlement transaction:', err);
+    }
+  }
+
   await split.deleteOne();
-  res.json({ message: 'Split deleted.' });
+  res.json({ message: 'Split and all associated transactions deleted.' });
 };
 
 module.exports = { getSplits, createSplit, settleParticipant, updateSplit, deleteSplit };

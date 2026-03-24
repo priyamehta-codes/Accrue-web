@@ -37,6 +37,11 @@ const Transactions = () => {
   const filtered = transactions.filter((tx) => {
     const q = search.toLowerCase();
     const matchSearch = !q || (tx.note || '').toLowerCase().includes(q) || (tx.category || '').toLowerCase().includes(q);
+    
+    if (typeFilter === 'splits') {
+      return matchSearch && (tx.reference === 'split_payment' || tx.reference === 'split_settlement');
+    }
+    
     const matchType = !typeFilter || tx.type === typeFilter;
     return matchSearch && matchType;
   });
@@ -85,9 +90,9 @@ const Transactions = () => {
           <Search size={15} style={{ position: 'absolute', left: 12, top: '50%', transform: 'translateY(-50%)', color: 'var(--text-3)' }} />
           <input className="form-input" style={{ paddingLeft: 36 }} placeholder="Search…" value={search} onChange={(e) => setSearch(e.target.value)} />
         </div>
-        {['', 'income', 'expense', 'transfer'].map((t) => (
+        {['', 'income', 'expense', 'transfer', 'splits'].map((t) => (
           <button key={t} className={`btn btn-sm ${typeFilter === t ? 'btn-primary' : 'btn-secondary'}`} style={{ textTransform: 'capitalize', flexShrink: 0 }} onClick={() => setTypeFilter(t)}>
-            {t === '' ? 'All' : t === 'transfer' ? 'Transfer' : t}
+            {t === '' ? 'All' : t === 'transfer' ? 'Transfer' : t === 'splits' ? 'Splits & Debts' : t}
           </button>
         ))}
       </div>
@@ -112,6 +117,12 @@ const Transactions = () => {
                     <span className="badge" style={{ background: typeColor[tx.type] + '22', color: typeColor[tx.type], marginRight: 6, textTransform: 'capitalize' }}>
                       {tx.type === 'transfer' ? 'self transfer' : tx.type}
                     </span>
+                    {tx.reference === 'split_payment' && (
+                      <span className="badge" style={{ background: 'var(--accent-dim)', color: 'var(--accent-light)', marginRight: 6 }}>Split Payment</span>
+                    )}
+                    {tx.reference === 'split_settlement' && (
+                      <span className="badge" style={{ background: 'var(--success-dim)', color: 'var(--success)', marginRight: 6 }}>Settlement</span>
+                    )}
                     {tx.accountId?.name} · {fmtDate(tx.date)}
                   </p>
                 </div>

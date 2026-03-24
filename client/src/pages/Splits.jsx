@@ -218,22 +218,25 @@ const Splits = () => {
               />
             </div>
             <div className="form-group">
-              <label className="form-label">Account</label>
-              <select className="form-select" value={form.accountId} onChange={e => setForm({...form, accountId: e.target.value})}>
+              <label className="form-label">Account {form.applyAsTransaction && ' *'}</label>
+              <select className="form-select" required={form.applyAsTransaction} value={form.accountId} onChange={e => setForm({...form, accountId: e.target.value})}>
                 <option value="">Select account</option>
                 {(accounts||[]).map(a => <option key={a._id} value={a._id}>{a.name}</option>)}
               </select>
             </div>
           </div>
 
-          <label style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer', fontSize: '0.85rem', color: 'var(--text-2)' }}>
+          <label className="card" style={{ display: 'flex', alignItems: 'center', gap: 12, cursor: 'pointer', padding: '12px 16px', border: form.applyAsTransaction ? '1px solid var(--accent-light)' : '1px solid var(--border)', background: form.applyAsTransaction ? 'var(--accent-dim)' : 'transparent', transition: 'all 0.2s' }}>
             <input 
               type="checkbox" 
               checked={form.applyAsTransaction} 
               onChange={e => setForm({ ...form, applyAsTransaction: e.target.checked })}
-              style={{ width: 16, height: 16 }}
+              style={{ width: 18, height: 18, accentColor: 'var(--accent-light)' }}
             />
-            Record as {form.type === 'borrow' ? 'Income' : 'Expense'} now
+            <div style={{ flex: 1 }}>
+              <p style={{ fontSize: '0.9rem', fontWeight: 700, color: form.applyAsTransaction ? 'var(--accent-light)' : 'var(--text-1)' }}>Record as {form.type === 'borrow' ? 'Income' : 'Expense'} now</p>
+              <p style={{ fontSize: '0.75rem', color: 'var(--text-3)', marginTop: 2 }}>This will update your account balance immediately with the total amount.</p>
+            </div>
           </label>
 
           {/* Participants - only for 'split' type or single person for lend/borrow */}
@@ -272,7 +275,9 @@ const Splits = () => {
 
           <div style={{ display: 'flex', gap: 10, justifyContent: 'flex-end', marginTop: 6 }}>
             <button type="button" className="btn btn-secondary" onClick={() => setModal(false)}>Cancel</button>
-            <button type="submit" className="btn btn-primary" disabled={saving}>{saving ? 'Saving…' : 'Create Split'}</button>
+            <button type="submit" className="btn btn-primary" disabled={saving}>
+              {saving ? 'Saving…' : form.type === 'split' ? 'Create Split' : form.type === 'lend' ? 'Lend Money' : 'Borrow Money'}
+            </button>
           </div>
         </form>
       </Modal>

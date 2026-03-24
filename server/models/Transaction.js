@@ -50,7 +50,7 @@ const transactionSchema = new mongoose.Schema(
     // Link to the source record if auto-created (bill payment, split settlement)
     reference: {
       type: String,
-      enum: ['manual', 'bill_payment', 'split_settlement', 'transfer'],
+      enum: ['manual', 'bill_payment', 'split_payment', 'split_settlement', 'transfer'],
       default: 'manual',
     },
     referenceId: {
