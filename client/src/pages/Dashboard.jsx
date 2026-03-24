@@ -244,7 +244,9 @@ const StatCard = ({ label, value, Icon, iconBg, color, delay, to }) => (
 
 const EMPTY_TX_FORM = { accountId: '', toAccountId: '', type: 'expense', amount: '', category: 'Food', specifiedCategory: '', note: '', date: new Date().toISOString().slice(0, 10) };
 
-const CATEGORIES = ['Food', 'Transport', 'Shopping', 'Entertainment', 'Bills', 'Health', 'Salary', 'Investment', 'Other'];
+const EXPENSE_CATEGORIES = ['Food', 'Transport', 'Shopping', 'Entertainment', 'Health', 'Education', 'Bills', 'Rent', 'Other'];
+const INCOME_CATEGORIES = ['Salary', 'Freelance', 'Investment', 'Gift', 'Refund', 'Other'];
+const CATEGORIES = [...EXPENSE_CATEGORIES, ...INCOME_CATEGORIES]; // For fallback or searching
 
 const StatSideStack = styled.div`
   display: flex;
@@ -314,7 +316,7 @@ const Dashboard = () => {
             <form onSubmit={handleCreateTx} style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
               <div className="tx-form-row">
                 {['expense', 'income', 'transfer'].map((t) => (
-                  <button key={t} type="button" className={`btn btn-sm ${txForm.type === t ? 'btn-primary' : 'btn-secondary'}`} style={{ flex: 1, textTransform: 'capitalize' }} onClick={() => setTxForm({ ...txForm, type: t })}>
+                  <button key={t} type="button" className={`btn btn-sm ${txForm.type === t ? 'btn-primary' : 'btn-secondary'}`} style={{ flex: 1, textTransform: 'capitalize' }} onClick={() => setTxForm({ ...txForm, type: t, category: t === 'income' ? 'Salary' : 'Food' })}>
                     {t === 'transfer' ? 'Self transfer' : t}
                   </button>
                 ))}
@@ -334,7 +336,7 @@ const Dashboard = () => {
               )}
               <div className="tx-form-row">
                 <select className="form-select" style={{ flex: 1 }} value={txForm.category} onChange={(e) => setTxForm({ ...txForm, category: e.target.value })}>
-                  {CATEGORIES.map((c) => <option key={c}>{c}</option>)}
+                  {(txForm.type === 'income' ? INCOME_CATEGORIES : EXPENSE_CATEGORIES).map((c) => <option key={c}>{c}</option>)}
                 </select>
                 {txForm.category === 'Other' && (
                   <input className="form-input" style={{ flex: 1 }} value={txForm.specifiedCategory} onChange={(e) => setTxForm({ ...txForm, specifiedCategory: e.target.value })} placeholder="Please specify (optional)" />
@@ -349,11 +351,9 @@ const Dashboard = () => {
 
           {/* Recent Transactions */}
           <div className="card fade-up">
-            <div className="section-header">
-              <span className="section-title">Recent Transactions</span>
-              <Link to="/transactions" className="btn btn-secondary btn-sm">
-                View all <ArrowRight size={13} />
-              </Link>
+            <div className="card-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <h3 className="card-title">Recent Transactions</h3>
+              <Link to="/transactions" className="btn btn-sm btn-secondary" style={{ fontSize: '0.75rem', padding: '4px 10px' }}>View All</Link>
             </div>
             {!d.recentTransactions?.length ? (
               <div className="empty-state">

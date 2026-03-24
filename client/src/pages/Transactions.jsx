@@ -13,7 +13,9 @@ const fmt = (n) =>
 
 const fmtDate = (d) => new Date(d).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' });
 
-const CATEGORIES = ['Food', 'Transport', 'Shopping', 'Entertainment', 'Bills', 'Health', 'Salary', 'Investment', 'Other'];
+const EXPENSE_CATEGORIES = ['Food', 'Transport', 'Shopping', 'Entertainment', 'Health', 'Education', 'Bills', 'Rent', 'Other'];
+const INCOME_CATEGORIES = ['Salary', 'Freelance', 'Investment', 'Gift', 'Refund', 'Other'];
+const CATEGORIES = [...EXPENSE_CATEGORIES, ...INCOME_CATEGORIES];
 const typeColor = { income: 'var(--success)', expense: 'var(--danger)', transfer: 'var(--accent-light)' };
 const typeSign  = { income: '+', expense: '−', transfer: '' };
 
@@ -146,7 +148,7 @@ const Transactions = () => {
               <button key={t} type="button"
                 className={`btn btn-sm ${form.type === t ? 'btn-primary' : 'btn-secondary'}`}
                 style={{ flex: 1, textTransform: 'capitalize' }}
-                onClick={() => setForm({ ...form, type: t })}
+                onClick={() => setForm({ ...form, type: t, category: t === 'income' ? 'Salary' : 'Food' })}
               >{t === 'transfer' ? 'Self transfer' : t}</button>
             ))}
           </div>
@@ -185,7 +187,7 @@ const Transactions = () => {
               <label className="form-label">Category</label>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
                 <select className="form-select" value={form.category} onChange={(e) => setForm({ ...form, category: e.target.value })}>
-                  {CATEGORIES.map((c) => <option key={c}>{c}</option>)}
+                  {(form.type === 'income' ? INCOME_CATEGORIES : EXPENSE_CATEGORIES).map((c) => <option key={c}>{c}</option>)}
                 </select>
                 {form.category === 'Other' && (
                   <input className="form-input" value={form.specifiedCategory} onChange={(e) => setForm({ ...form, specifiedCategory: e.target.value })} placeholder="Please specify (optional)" />

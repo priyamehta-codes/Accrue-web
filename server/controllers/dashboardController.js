@@ -40,10 +40,10 @@ const getDashboard = async (req, res) => {
       { $group: { _id: null, total: { $sum: '$amount' } } },
     ]),
 
-    // Last 10 transactions
+    // Last 5 transactions
     Transaction.find({ userId })
-      .sort({ date: -1 })
-      .limit(10)
+      .sort({ date: -1, _id: -1 })
+      .limit(5)
       .populate('accountId', 'name color icon'),
 
     // Bills due in next 7 days (not paid)
