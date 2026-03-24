@@ -2,6 +2,7 @@ import React, { useState, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import { TrendingUp, TrendingDown, Wallet, Users, Receipt, ArrowRight, RefreshCw } from 'lucide-react';
 import { motion } from 'framer-motion';
+import styled from 'styled-components';
 import Layout from '../components/Layout';
 import Loader from '../components/newloader';
 import useCachedFetch from '../hooks/useCachedFetch';
@@ -18,7 +19,6 @@ const fmtDate = (d) =>
 const typeColor = { income: 'var(--success)', expense: 'var(--danger)', transfer: 'var(--accent-light)' };
 const typeSign  = { income: '+', expense: '−', transfer: '' };
 
-import styled from 'styled-components';
 
 const StyledStatCard = styled(motion.div)`
   background: var(--bg-surface);
@@ -32,6 +32,14 @@ const StyledStatCard = styled(motion.div)`
   overflow: hidden;
   box-shadow: var(--shadow-sm);
   transition: transform var(--transition), box-shadow var(--transition);
+
+  @media (max-width: 768px) {
+    padding: 12px 8px;
+    gap: 4px;
+    align-items: center;
+    text-align: center;
+    border-radius: var(--r-md);
+  }
 
   &:hover {
     transform: translateY(-4px);
@@ -54,6 +62,12 @@ const StyledStatCard = styled(motion.div)`
     color: var(--text-3);
     text-transform: uppercase;
     letter-spacing: 0.05em;
+
+    @media (max-width: 768px) {
+      font-size: 0.6rem;
+      letter-spacing: 0;
+      white-space: nowrap;
+    }
   }
 
   .value {
@@ -61,6 +75,13 @@ const StyledStatCard = styled(motion.div)`
     font-weight: 800;
     line-height: 1;
     color: var(--text-1);
+
+    @media (max-width: 768px) {
+      font-size: 1.1rem;
+      width: 100%;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
   }
 
   .icon-wrapper {
@@ -73,11 +94,16 @@ const StyledStatCard = styled(motion.div)`
     justify-content: center;
     background: ${(props) => props.$iconBg || 'var(--accent-dim)'};
     color: ${(props) => props.$themeColor || 'var(--accent)'};
+
+    @media (max-width: 768px) {
+      display: none;
+    }
   }
 `;
 
 const StatCard = ({ label, value, Icon, iconBg, color, delay }) => (
   <StyledStatCard 
+    className="stat-card"
     $themeColor={color}
     $iconBg={iconBg}
     initial={{ opacity: 0, y: 20 }}

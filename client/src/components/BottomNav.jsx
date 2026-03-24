@@ -127,12 +127,12 @@ const BottomNav = ({ onTxAdded }) => {
             </FabWrapper>
           );
           const { to, label, Icon, key } = item;
-          const hasDrafts = key === 'bills' ? d.upcomingBillsCount > 0 : key === 'splits' ? d.activeSplitsCount > 0 : false;
+          const hasDot = key === 'bills' ? (d.upcomingBills?.length > 0) : key === 'splits' ? (d.unsettledSplitsCount > 0) : false;
           return (
             <NavItem key={to} to={to} end={to === '/dashboard'}>
               <div style={{ position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                 <Icon size={22} />
-                {hasDrafts && (
+                {hasDot && (
                   <span style={{ 
                     position: 'absolute', top: -2, right: -2, 
                     width: 9, height: 9, background: 'var(--danger)', 

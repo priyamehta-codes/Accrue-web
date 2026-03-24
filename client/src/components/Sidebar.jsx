@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import {
@@ -22,6 +22,15 @@ const Sidebar = () => {
   const [mobileOpen, setMobileOpen] = useState(false);
   const { data } = useCachedFetch(useCallback(getDashboard, []), getCachedDashboard);
   const d = data || {};
+
+  useEffect(() => {
+    if (mobileOpen) {
+      document.body.classList.add('sidebar-mobile-active');
+    } else {
+      document.body.classList.remove('sidebar-mobile-active');
+    }
+    return () => document.body.classList.remove('sidebar-mobile-active');
+  }, [mobileOpen]);
 
   const handleLogout = () => { logout(); navigate('/login'); };
 
@@ -60,7 +69,7 @@ const Sidebar = () => {
         {/* Nav */}
         <nav className="sidebar-nav">
           {navItems.map(({ to, label, Icon, key }) => {
-            const hasDrafts = key === 'bills' ? d.upcomingBillsCount > 0 : key === 'splits' ? d.activeSplitsCount > 0 : false;
+            const hasDot = key === 'bills' ? (d.upcomingBills?.length > 0) : key === 'splits' ? (d.unsettledSplitsCount > 0) : false;
             return (
               <NavLink
                 key={to}
@@ -72,7 +81,7 @@ const Sidebar = () => {
               >
                 <div style={{ position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                   <Icon size={18} />
-                  {hasDrafts && (
+                  {hasDot && (
                     <span style={{ 
                       position: 'absolute', top: -2, right: -2, 
                       width: 8, height: 8, background: 'var(--danger)', 

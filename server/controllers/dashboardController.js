@@ -11,6 +11,7 @@ const getDashboard = async (req, res) => {
   const userObjectId = new mongoose.Types.ObjectId(userId);
 
   const now = new Date();
+  const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate());
   const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
   const endOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59);
   const next7Days = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000);
@@ -49,7 +50,7 @@ const getDashboard = async (req, res) => {
     Bill.find({
       userId,
       isPaid: false,
-      dueDate: { $gte: now, $lte: next7Days },
+      dueDate: { $gte: startOfToday, $lte: next7Days },
     }).sort({ dueDate: 1 }),
 
     // Count of unsettled splits

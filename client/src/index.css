@@ -111,7 +111,49 @@ a:hover { color: var(--accent); }
     max-width: 100vw;
     overflow-x: hidden;
   }
+  .sidebar {
+    padding-bottom: 90px; /* safety padding */
+  }
+  body.sidebar-mobile-active .bottom-nav {
+    display: none !important;
+  }
   .desktop-only { display: none !important; }
+
+  /* Dashboard Stat Row Fix: Expense top (100%), Balance/Income bottom (50/50) */
+  .stat-grid {
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 8px !important;
+    margin-bottom: 16px !important;
+  }
+  .stat-card {
+    padding: 12px 8px !important;
+    gap: 4px !important;
+    align-items: center;
+    text-align: center;
+    border-radius: var(--r-md) !important;
+  }
+  .stat-card:nth-child(1) { order: 2; } /* Balance */
+  .stat-card:nth-child(2) { order: 3; } /* Income */
+  .stat-card:nth-child(3) { order: 1; grid-column: 1 / -1; } /* Expense */
+
+  /* Hide icons on small cards */
+  .stat-card .icon-wrapper,
+  .stat-card .stat-icon {
+    display: none !important;
+  }
+  .stat-card .label,
+  .stat-card .stat-label {
+    font-size: 0.6rem !important;
+    letter-spacing: 0;
+    white-space: nowrap;
+  }
+  .stat-card .value,
+  .stat-card .stat-value {
+    font-size: 1rem !important;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    width: 100%;
+  }
 }
 
 @media (min-width: 769px) {
