@@ -101,7 +101,10 @@ const Sidebar = () => {
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', paddingRight: '8px' }}>
           <NavLink to="/" style={{ textDecoration: 'none' }} className="sidebar-logo">
             <div className="logo-icon"><TrendingUp size={20} /></div>
-            <span className="logo-text">Accrue</span>
+            <div>
+              <span className="logo-text">Accrue</span>
+              <p style={{ fontSize: '0.62rem', color: 'var(--text-3)', fontWeight: 500, marginTop: 1, lineHeight: 1 }}>Your personal finance tracker</p>
+            </div>
           </NavLink>
           
           <div style={{ display: 'flex', gap: '4px' }}>
