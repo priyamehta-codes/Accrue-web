@@ -206,7 +206,8 @@ a:hover { color: var(--accent); }
 
 /* ── Back Button ────────────────────────────────────────────────────────────── */
 .back-button-container {
-  margin-bottom: 24px;
+  margin-bottom: 14px;
+  margin-top: -4px;
 }
 
 /* ── Cards ──────────────────────────────────────────────────────────────────── */
@@ -686,17 +687,285 @@ a:hover { color: var(--accent); }
 .bill-item, .split-item {
   display: flex;
   align-items: center;
-  gap: 14px;
+  gap: 12px;
   padding: 14px 16px;
   border-radius: var(--r-md);
   border: 1px solid var(--border);
   background: var(--bg-surface);
   margin-bottom: 8px;
   transition: border-color var(--transition);
+  flex-wrap: nowrap;
+  min-width: 0;
+}
+.bill-item:hover, .split-item:hover { border-color: var(--border-hover); }
+
+/* ── Bill Card (new 2-row layout for Bills page) ──────────────────────────── */
+.bill-card {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 14px 16px;
+  border-radius: var(--r-md);
+  border: 1px solid var(--border);
+  background: var(--bg-surface);
+  margin-bottom: 0;
+  transition: border-color var(--transition);
+}
+.bill-card:hover { border-color: var(--border-hover); }
+.bill-card.bill-due-soon { border-color: rgba(245,158,11,0.3); background: rgba(245,158,11,0.04); }
+.bill-card.bill-overdue  { border-color: rgba(239,68,68,0.3);  background: rgba(239,68,68,0.04);  }
+.bill-card.bill-paid     { opacity: 0.55; }
+
+/* Top row: icon · name+badge · amount · bell */
+.bill-card-top {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+.bill-card-icon {
+  width: 36px; height: 36px;
+  border-radius: var(--r-md);
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+}
+.bill-card-name {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  overflow: hidden;
+}
+.bill-name-text {
+  font-weight: 600;
+  color: var(--text-1);
+  font-size: 0.9rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  flex-shrink: 1;
+}
+.bill-card-amount {
+  font-weight: 700;
+  font-size: 0.95rem;
+  white-space: nowrap;
+  flex-shrink: 0;
 }
 
-.bill-item:hover, .split-item:hover { border-color: var(--border-hover); }
+/* Bottom row: status · date · category · actions */
+.bill-card-bottom {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding-left: 46px; /* align with name (icon width + gap) */
+}
+.bill-card-meta {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+  flex: 1;
+  min-width: 0;
+}
+.bill-status-text {
+  font-size: 0.75rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
+.bill-date-text {
+  font-size: 0.75rem;
+  color: var(--text-3);
+  white-space: nowrap;
+}
+.bill-card-actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+@media (max-width: 480px) {
+  .bill-card {
+    padding: 12px 12px;
+  }
+  .bill-card-bottom {
+    padding-left: 46px;
+  }
+  .bill-card-amount {
+    font-size: 0.88rem;
+  }
+  .bill-name-text {
+    font-size: 0.85rem;
+  }
+  .bill-card-actions .btn-sm {
+    padding: 4px 10px;
+    font-size: 0.75rem;
+  }
+}
 
 .bill-due-soon { border-color: rgba(245,158,11,0.3); background: rgba(245,158,11,0.04); }
 .bill-overdue  { border-color: rgba(239,68,68,0.3);  background: rgba(239,68,68,0.04);  }
 .bill-paid     { opacity: 0.5; }
+
+/* ── Bill Reminder Toggle Button ─────────────────────────────────────────────── */
+.btn-reminder-toggle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px; height: 32px;
+  border-radius: var(--r-md);
+  border: 1.5px solid var(--border);
+  background: transparent;
+  color: var(--text-3);
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: all var(--transition);
+  font-family: inherit;
+  padding: 0;
+}
+
+.btn-reminder-toggle:hover:not(:disabled) {
+  border-color: var(--accent);
+  color: var(--accent);
+  background: var(--accent-dim);
+}
+
+.btn-reminder-toggle.active {
+  background: var(--accent-dim);
+  border-color: var(--accent);
+  color: var(--accent-light);
+}
+
+.btn-reminder-toggle:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
+/* ── Bill Reminder Badge ─────────────────────────────────────────────────────── */
+.bill-reminder-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 1px 7px;
+  border-radius: var(--r-full);
+  font-size: 0.65rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  background: var(--accent-dim);
+  color: var(--accent-light);
+  border: 1px solid rgba(99,102,241,0.25);
+}
+
+/* ── Bill Reminder Row in Add Form ───────────────────────────────────────────── */
+.bill-reminder-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px 14px;
+  border-radius: var(--r-md);
+  border: 1px solid var(--border);
+  background: var(--bg-elevated);
+  transition: border-color var(--transition);
+}
+
+.bill-reminder-row:hover { border-color: var(--border-hover); }
+
+.reminder-toggle-icon {
+  width: 30px; height: 30px;
+  border-radius: var(--r-sm);
+  display: flex; align-items: center; justify-content: center;
+  background: var(--bg-overlay);
+  color: var(--text-3);
+  transition: all var(--transition);
+}
+
+.reminder-toggle-icon.active {
+  background: var(--accent-dim);
+  color: var(--accent-light);
+}
+
+/* ── Toggle Switch ───────────────────────────────────────────────────────────── */
+.toggle-switch {
+  width: 42px; height: 24px;
+  border-radius: var(--r-full);
+  background: var(--bg-overlay);
+  border: 1.5px solid var(--border);
+  position: relative;
+  cursor: pointer;
+  transition: all 0.25s cubic-bezier(0.4,0,0.2,1);
+  flex-shrink: 0;
+}
+
+.toggle-switch.on {
+  background: var(--accent);
+  border-color: var(--accent);
+}
+
+.toggle-knob {
+  position: absolute;
+  top: 2px; left: 2px;
+  width: 16px; height: 16px;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.2);
+  transition: transform 0.25s cubic-bezier(0.4,0,0.2,1);
+}
+
+.toggle-switch.on .toggle-knob {
+  transform: translateX(18px);
+}
+
+/* ── Dashboard Header Mobile Alignment ───────────────────────────────────────── */
+.dashboard-page-header {
+  align-items: center;
+  padding-top: 0;
+}
+
+@media (max-width: 768px) {
+  /* Pull the whole header up so it sits flush with the
+     fixed hamburger button (hamburger top:14px, content starts at 64px → pull 48px) */
+  .dashboard-page-header {
+    margin-top: -48px;
+    margin-bottom: 14px;
+    align-items: center;
+    flex-wrap: nowrap;
+    gap: 8px;
+  }
+  .dashboard-header-left {
+    /* 50px = hamburger btn (~38px) + gap (12px) */
+    padding-left: 50px;
+    flex: 1;
+    min-width: 0;
+  }
+  .dashboard-page-header .page-title {
+    font-size: 1.05rem;
+    font-weight: 800;
+    line-height: 1.2;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .dashboard-page-header .page-subtitle {
+    font-size: 0.72rem;
+    line-height: 1.2;
+  }
+
+  /* Back button on inner pages: pull up same amount + make it smaller */
+  .back-button-container {
+    margin-top: -48px !important;
+    margin-bottom: 14px;
+  }
+  .back-button-container .button {
+    font-size: 11px !important;
+    padding-block: 0.28rem !important;
+    padding-inline: 0.7rem !important;
+    gap: 5px !important;
+  }
+  .back-button-container .icon {
+    width: 14px !important;
+    height: 14px !important;
+  }
+}

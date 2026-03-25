@@ -1,12 +1,11 @@
 import React, { useState, useCallback } from 'react';
-import { Plus, CheckCircle, Trash2, Clock, AlertCircle } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { Plus, CheckCircle, Trash2, Clock, AlertCircle, Bell, BellOff } from 'lucide-react';
 import Layout from '../components/Layout';
 import BackButton from '../components/BackButton';
 import Modal from '../components/Modal';
 import Loader from '../components/newloader';
 import useCachedFetch from '../hooks/useCachedFetch';
-import { getBills, getCachedBills, createBill, payBill, deleteBill } from '../api/bills';
+import { getBills, getCachedBills, createBill, payBill, deleteBill, updateBill } from '../api/bills';
 import { getAccounts, getCachedAccounts } from '../api/accounts';
 
 const fmt = (n) =>
@@ -22,7 +21,7 @@ const getDueBadge = (dueDate, isPaid) => {
   return { text: `Due in ${days}d`, color: 'var(--text-3)', Icon: Clock, cls: '' };
 };
 
-const EMPTY_FORM = { name: '', amount: '', category: 'Bills', dueDate: '', accountId: '', notes: '' };
+const EMPTY_FORM = { name: '', amount: '', category: 'Bills', dueDate: '', accountId: '', notes: '', isRecurring: false };
 
 const Bills = () => {
   const fetchBills = useCallback(getBills, []);
@@ -35,10 +34,19 @@ const Bills = () => {
   const [payAccountId, setPayAccountId] = useState('');
   const [form, setForm] = useState(EMPTY_FORM);
   const [saving, setSaving] = useState(false);
+  const [togglingId, setTogglingId] = useState(null);
 
   const handleSave = async (e) => {
     e.preventDefault(); setSaving(true);
-    try { await createBill({ ...form, amount: parseFloat(form.amount) }); setModal(false); refresh(); }
+    try {
+      await createBill({
+        ...form,
+        amount: parseFloat(form.amount),
+        isRecurring: form.isRecurring || false,
+        recurringPeriod: form.isRecurring ? 'monthly' : null,
+      });
+      setModal(false); refresh();
+    }
     catch (err) { console.error(err); } finally { setSaving(false); }
   };
 
@@ -53,6 +61,20 @@ const Bills = () => {
     await deleteBill(id); refresh();
   };
 
+  const handleToggleReminder = async (bill) => {
+    if (togglingId === bill._id) return;
+    setTogglingId(bill._id);
+    try {
+      const newVal = !bill.isRecurring;
+      await updateBill(bill._id, {
+        isRecurring: newVal,
+        recurringPeriod: newVal ? 'monthly' : null,
+      });
+      refresh();
+    } catch (err) { console.error(err); }
+    finally { setTogglingId(null); }
+  };
+
   if (isLoading && !bills?.length) return <Layout><div className="loading-overlay"><Loader /><p style={{ marginTop: 12, color: 'var(--text-3)', fontWeight: 600 }}>Connecting to server...</p></div></Layout>;
 
   const unpaid = (bills || []).filter(b => !b.isPaid);
@@ -60,9 +82,11 @@ const Bills = () => {
 
   return (
     <Layout>
-      <div className="page-header">
+      {/* Back button sits at the very top, above the title row */}
+      <BackButton />
+
+      <div className="page-header" style={{ marginTop: 0 }}>
         <div>
-          <BackButton />
           <h1 className="page-title">Bills</h1>
           <p className="page-subtitle">{unpaid.length} unpaid · {paid.length} paid</p>
         </div>
@@ -84,30 +108,67 @@ const Bills = () => {
         <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
           {[...unpaid, ...paid].map((bill) => {
             const { text, color, Icon, cls } = getDueBadge(bill.dueDate, bill.isPaid);
+            const isReminder = bill.isRecurring && bill.recurringPeriod === 'monthly';
+            const isToggling = togglingId === bill._id;
+
             return (
-              <div key={bill._id} className={`bill-item fade-up ${cls}`}>
-                <div style={{ width: 38, height: 38, borderRadius: 'var(--r-md)', background: color+'22', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                  <Icon size={18} style={{ color }}/>
+              <div key={bill._id} className={`bill-card fade-up ${cls}`}>
+                {/* ── Row 1: Icon · Name · Amount · Reminder ── */}
+                <div className="bill-card-top">
+                  <div className="bill-card-icon" style={{ background: color + '22' }}>
+                    <Icon size={17} style={{ color }} />
+                  </div>
+
+                  <div className="bill-card-name">
+                    <p className="bill-name-text">{bill.name}</p>
+                    {isReminder && <span className="bill-reminder-badge">Monthly</span>}
+                  </div>
+
+                  <span className="bill-card-amount" style={{ color: bill.isPaid ? 'var(--text-3)' : 'var(--text-1)' }}>
+                    {fmt(bill.amount)}
+                  </span>
+
+                  <button
+                    className={`btn-reminder-toggle ${isReminder ? 'active' : ''}`}
+                    onClick={() => handleToggleReminder(bill)}
+                    disabled={isToggling || bill.isPaid}
+                    title={isReminder ? 'Remove monthly reminder' : 'Set as monthly reminder'}
+                  >
+                    {isReminder
+                      ? <Bell size={14} style={{ fill: 'currentColor' }} />
+                      : <BellOff size={14} />
+                    }
+                  </button>
                 </div>
-                <div style={{ flex: 1, minWidth: 0 }}>
-                  <p style={{ fontWeight: 600, color: 'var(--text-1)' }}>{bill.name}</p>
-                  <div style={{ display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap', marginTop: 2 }}>
-                    <span style={{ fontSize: '0.75rem', color }}>{text}</span>
-                    <span style={{ fontSize: '0.75rem', color: 'var(--text-3)' }}>· {fmtDate(bill.dueDate)}</span>
+
+                {/* ── Row 2: Status · Date · Category · Actions ── */}
+                <div className="bill-card-bottom">
+                  <div className="bill-card-meta">
+                    <span className="bill-status-text" style={{ color }}>{text}</span>
+                    <span className="bill-date-text">· {fmtDate(bill.dueDate)}</span>
                     {bill.category && <span className="badge">{bill.category}</span>}
                   </div>
+                  <div className="bill-card-actions">
+                    {!bill.isPaid && (
+                      <button
+                        className="btn btn-sm btn-success"
+                        onClick={() => { setPayModal(bill); setPayAccountId(bill.accountId?._id || ''); }}
+                      >
+                        Pay
+                      </button>
+                    )}
+                    <button className="btn btn-icon btn-danger" onClick={() => handleDelete(bill._id)} title="Delete">
+                      <Trash2 size={14}/>
+                    </button>
+                  </div>
                 </div>
-                <span style={{ fontWeight: 700, color: bill.isPaid ? 'var(--text-3)' : 'var(--text-1)', fontSize: '1rem' }}>{fmt(bill.amount)}</span>
-                {!bill.isPaid && (
-                  <button className="btn btn-sm btn-success" onClick={() => { setPayModal(bill); setPayAccountId(bill.accountId?._id || ''); }}>Pay</button>
-                )}
-                <button className="btn btn-icon btn-danger" onClick={() => handleDelete(bill._id)} title="Delete"><Trash2 size={14}/></button>
               </div>
             );
           })}
         </div>
       )}
 
+      {/* ── Add Bill Modal ── */}
       <Modal isOpen={modal} onClose={() => setModal(false)} title="Add Bill">
         <form onSubmit={handleSave} style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
           <div className="form-group">
@@ -131,6 +192,23 @@ const Bills = () => {
               {(accounts||[]).map(a => <option key={a._id} value={a._id}>{a.name}</option>)}
             </select>
           </div>
+
+          {/* Monthly Reminder Toggle */}
+          <label className="bill-reminder-row" style={{ cursor: 'pointer' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 10, flex: 1 }}>
+              <div className={`reminder-toggle-icon ${form.isRecurring ? 'active' : ''}`}>
+                <Bell size={15} style={{ fill: form.isRecurring ? 'currentColor' : 'none' }} />
+              </div>
+              <div>
+                <p style={{ fontWeight: 600, color: 'var(--text-1)', fontSize: '0.88rem' }}>Monthly Reminder</p>
+                <p style={{ fontSize: '0.75rem', color: 'var(--text-3)' }}>Mark this as a recurring monthly bill</p>
+              </div>
+            </div>
+            <div className={`toggle-switch ${form.isRecurring ? 'on' : ''}`} onClick={() => setForm({...form, isRecurring: !form.isRecurring})}>
+              <div className="toggle-knob" />
+            </div>
+          </label>
+
           <div style={{ display: 'flex', gap: 10, justifyContent: 'flex-end', marginTop: 6 }}>
             <button type="button" className="btn btn-secondary" onClick={() => setModal(false)}>Cancel</button>
             <button type="submit" className="btn btn-primary" disabled={saving}>{saving ? 'Saving…' : 'Add Bill'}</button>
@@ -138,6 +216,7 @@ const Bills = () => {
         </form>
       </Modal>
 
+      {/* ── Pay Bill Modal ── */}
       <Modal isOpen={!!payModal} onClose={() => setPayModal(null)} title={`Pay — ${payModal?.name}`} size="sm">
         <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
           <p style={{ color: 'var(--text-2)' }}>Paying <strong style={{ color: 'var(--text-1)' }}>{fmt(payModal?.amount)}</strong> from:</p>

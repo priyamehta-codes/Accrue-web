@@ -83,13 +83,15 @@ const Sidebar = () => {
 
   return (
     <>
-      <button
-        className="mobile-menu-btn"
-        onClick={() => setMobileOpen(!mobileOpen)}
-        aria-label="Toggle navigation"
-      >
-        {mobileOpen ? null : <Menu size={22} />}
-      </button>
+      {location.pathname === '/dashboard' && (
+        <button
+          className="mobile-menu-btn"
+          onClick={() => setMobileOpen(!mobileOpen)}
+          aria-label="Toggle navigation"
+        >
+          {mobileOpen ? null : <Menu size={22} />}
+        </button>
+      )}
 
       {mobileOpen && (
         <div className="sidebar-backdrop" onClick={() => setMobileOpen(false)} />

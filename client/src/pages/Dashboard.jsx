@@ -294,12 +294,12 @@ const Dashboard = () => {
 
   return (
     <Layout onTxAdded={refresh}>
-      <div className="page-header">
-        <div>
+      <div className="page-header dashboard-page-header">
+        <div className="dashboard-header-left">
           <h1 className="page-title">{getGreeting()}, {user?.name?.split(' ')[0] || 'User'}</h1>
           <p className="page-subtitle">{d.month} overview</p>
         </div>
-        <div />
+        <div className="dashboard-header-right" />
       </div>
 
       {/* Stats */}
