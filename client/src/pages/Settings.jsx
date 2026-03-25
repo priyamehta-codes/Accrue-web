@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import styled from 'styled-components';
-import { User, Mail, LogOut, Save, Shield, Moon, Sun, CheckCircle } from 'lucide-react';
+import { User, Mail, LogOut, Save, Shield, Moon, Sun, CheckCircle, Share2, Home, ExternalLink } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { Link } from 'react-router-dom';
 import Layout from '../components/Layout';
 import BackButton from '../components/BackButton';
 import { useAuth } from '../context/AuthContext';
@@ -58,6 +59,25 @@ const Settings = () => {
       console.error('Sync failed:', err);
     } finally {
       setSyncing(false);
+    }
+  };
+
+  const handleShare = async () => {
+    const shareData = {
+      title: 'Accrue Expense Tracker',
+      text: 'Check out Accrue - a modern and secure way to track your finances!',
+      url: window.location.origin
+    };
+
+    try {
+      if (navigator.share) {
+        await navigator.share(shareData);
+      } else {
+        await navigator.clipboard.writeText(window.location.origin);
+        alert('App link copied to clipboard!');
+      }
+    } catch (err) {
+      console.error('Error sharing:', err);
     }
   };
 
@@ -174,6 +194,35 @@ const Settings = () => {
             </div>
           </section>
         </SettingsGrid>
+
+        <FooterSection>
+          <div className="footer-card card">
+            <div className="footer-content">
+              <div>
+                <h3>Share Accrue</h3>
+                <p>Help others manage their finances better by sharing this app.</p>
+              </div>
+              <button className="btn btn-secondary share-btn" onClick={handleShare}>
+                <Share2 size={18} />
+                Share App
+              </button>
+            </div>
+            
+            <div className="divider" />
+            
+            <div className="footer-links">
+              <Link to="/" className="footer-link">
+                <Home size={18} />
+                Return to Home Page
+              </Link>
+              <div className="credentials">
+                <span>Accrue v1.0.0</span>
+                <span className="dot">•</span>
+                <span>Highly Secure</span>
+              </div>
+            </div>
+          </div>
+        </FooterSection>
       </div>
 
       <style>{`
@@ -206,6 +255,61 @@ const Settings = () => {
         .preference-desc { font-size: 0.85rem; color: var(--text-3); }
         
         .danger-zone { margin-top: 8px; }
+
+        .share-btn {
+          display: flex;
+          align-items: center;
+          gap: 8px;
+        }
+
+        .footer-content {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          padding-bottom: 20px;
+          gap: 20px;
+        }
+
+        .footer-content h3 { font-size: 1rem; color: var(--text-1); margin-bottom: 4px; }
+        .footer-content p { font-size: 0.85rem; color: var(--text-3); }
+
+        .footer-links {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          padding-top: 20px;
+        }
+
+        .footer-link {
+          display: flex;
+          align-items: center;
+          gap: 8px;
+          color: var(--accent);
+          text-decoration: none;
+          font-weight: 600;
+          font-size: 0.9rem;
+          transition: all 0.2s;
+        }
+
+        .footer-link:hover {
+          opacity: 0.8;
+          transform: translateX(-4px);
+        }
+
+        .credentials {
+          font-size: 0.8rem;
+          color: var(--text-3);
+          display: flex;
+          align-items: center;
+          gap: 8px;
+        }
+
+        .dot { opacity: 0.5; }
+
+        @media (max-width: 600px) {
+          .footer-content { flex-direction: column; text-align: center; }
+          .footer-links { flex-direction: column; gap: 16px; }
+        }
       `}</style>
     </Layout>
   );
@@ -216,10 +320,15 @@ const SettingsGrid = styled.div`
   grid-template-columns: 1.2fr 1fr;
   gap: 24px;
   align-items: start;
+  margin-bottom: 24px;
 
   @media (max-width: 968px) {
     grid-template-columns: 1fr;
   }
+`;
+
+const FooterSection = styled.div`
+  margin-top: 24px;
 `;
 
 export default Settings;
