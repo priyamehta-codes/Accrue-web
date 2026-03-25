@@ -40,7 +40,7 @@ const getTransactions = async (req, res) => {
 
   const total = await Transaction.countDocuments(filter);
   const transactions = await Transaction.find(filter)
-    .sort({ date: -1, _id: -1 })
+    .sort({ date: -1, createdAt: -1 })
     .skip((page - 1) * limit)
     .limit(parseInt(limit))
     .populate('accountId', 'name color icon')
@@ -61,7 +61,7 @@ const createTransaction = async (req, res) => {
     amount,
     category,
     note,
-    date: date || new Date(),
+    date: date ? new Date(new Date(date).setHours(0,0,0,0)) : new Date().setHours(0,0,0,0),
     tags: tags || [],
     reference: 'manual',
   });
@@ -96,7 +96,7 @@ const updateTransaction = async (req, res) => {
   tx.amount = amount || tx.amount;
   tx.category = category !== undefined ? category : tx.category;
   tx.note = note !== undefined ? note : tx.note;
-  tx.date = date || tx.date;
+  tx.date = date ? new Date(new Date(date).setHours(0,0,0,0)) : tx.date;
   tx.tags = tags || tx.tags;
   await tx.save();
 

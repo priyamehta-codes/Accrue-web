@@ -29,7 +29,7 @@ const createSplit = async (req, res) => {
       amount: totalAmount,
       category: type === 'split' ? 'Split' : type === 'lend' ? 'Lending' : 'Borrowing',
       note: `${description} (${type})`,
-      date: new Date(),
+      date: new Date().setHours(0,0,0,0),
       reference: 'split_payment',
       referenceId: null, // Will update after split creation
     });
@@ -82,7 +82,7 @@ const settleParticipant = async (req, res) => {
       amount: participant.amount,
       category: split.type === 'borrow' ? 'Debt Repayment' : 'Split Settlement',
       note: `${participant.name} ${split.type === 'borrow' ? 'repaid' : 'settled'} — ${split.description}`,
-      date: new Date(),
+      date: new Date().setHours(0,0,0,0),
       reference: 'split_settlement',
       referenceId: split._id,
     });
