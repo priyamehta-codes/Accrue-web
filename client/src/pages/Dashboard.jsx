@@ -445,7 +445,7 @@ const Dashboard = () => {
                   const balanceAfter = getBalanceAfter();
 
                   return (
-                    <div key={tx._id} className="tx-item">
+                    <Link key={tx._id} to="/transactions" className="tx-item" style={{ textDecoration: 'none', color: 'inherit', cursor: 'pointer' }}>
                       <div className="tx-icon" style={{ background: typeColor[tx.type] + '22' }}>
                         {tx.type === 'income' ? '↓' : tx.type === 'expense' ? '↑' : '⇄'}
                       </div>
@@ -463,7 +463,7 @@ const Dashboard = () => {
                       <span className="tx-amount" style={{ color: typeColor[tx.type] }}>
                         {typeSign[tx.type]}{fmt(tx.amount)}
                       </span>
-                    </div>
+                    </Link>
                   );
                 })}
               </div>
