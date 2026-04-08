@@ -20,9 +20,10 @@ const CalcContainer = styled.div`
 
   @media (max-width: 768px) {
     max-width: 100%;
-    margin: 10px 0;
-    padding: 16px;
+    margin: 0 auto;
+    padding: 16px 16px 32px 16px;
     border-radius: var(--r-xl);
+    gap: 16px;
   }
 
   &::before {
@@ -50,6 +51,11 @@ const DisplayWrapper = styled(motion.div)`
   box-shadow: inset 0 2px 4px rgba(0,0,0,0.05);
   position: relative;
   overflow: hidden;
+
+  @media (max-width: 768px) {
+    min-height: 100px;
+    padding: 16px;
+  }
 
   &::after {
     content: '';
@@ -132,8 +138,8 @@ const CalcButton = styled(motion.button)`
   `}
 
   @media (max-width: 480px) {
-    height: 60px;
-    font-size: 1.2rem;
+    height: 56px;
+    font-size: 1.15rem;
   }
 `;
 
@@ -234,8 +240,8 @@ const Calculator = () => {
             
             <div className="page-header" style={{ marginTop: 0 }}>
                 <div>
-                    <h1 className="page-title">Calculator</h1>
-                    <p className="page-subtitle">Quick calculations for your budget</p>
+                    <h1 className="page-title" style={{ fontSize: 'var(--mobile-title-size, 1.3rem)' }}>Calculator</h1>
+                    <p className="page-subtitle desktop-only">Quick calculations for your budget</p>
                 </div>
                 <div className="desktop-only" style={{ background: 'var(--accent-dim)', color: 'var(--accent-light)', padding: '8px 12px', borderRadius: 'var(--r-md)', display: 'flex', alignItems: 'center', gap: 8 }}>
                     <CalcIcon size={18} />
