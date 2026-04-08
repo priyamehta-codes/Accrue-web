@@ -1,6 +1,6 @@
 import React, { useState, useCallback } from 'react';
 import { Link } from 'react-router-dom';
-import { TrendingUp, TrendingDown, Wallet, Users, Receipt, ArrowRight, PieChart as PieIcon } from 'lucide-react';
+import { TrendingUp, TrendingDown, Wallet, Users, Receipt, ArrowRight, PieChart as PieIcon, Calculator as CalcIcon } from 'lucide-react';
 import { motion } from 'framer-motion';
 import styled from 'styled-components';
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from 'recharts';
@@ -328,6 +328,47 @@ const StatSideStack = styled.div`
   }
 `;
 
+const MobileCalcShortcut = styled(Link)`
+  display: none;
+  @media (max-width: 768px) {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    background: var(--bg-surface);
+    border: 1px solid var(--border);
+    border-radius: var(--r-lg);
+    padding: 12px;
+    margin-top: 16px;
+    text-decoration: none;
+    color: var(--text-1);
+    transition: all var(--transition);
+
+    &:hover {
+      border-color: var(--accent-light);
+      background: var(--bg-hover);
+    }
+    
+    .logo-container {
+      width: 36px;
+      height: 36px;
+      background: var(--accent-dim);
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--accent-light);
+    }
+
+    .text {
+      font-weight: 700;
+      font-size: 1.1rem;
+      color: var(--accent);
+    }
+    grid-column: 1 / -1;
+  }
+`;
+
 const Dashboard = () => {
   const { user } = useAuth();
   const fetch = useCallback(getDashboard, []);
@@ -359,7 +400,11 @@ const Dashboard = () => {
           <h1 className="page-title">{getGreeting()}, {user?.name?.split(' ')[0] || 'User'}</h1>
           <p className="page-subtitle">{d.month} overview</p>
         </div>
-        <div className="dashboard-header-right" />
+        <div className="dashboard-header-right" >
+           <Link to="/calculator" className="btn btn-icon btn-secondary desktop-only" title="Calculator">
+             <CalcIcon size={18} />
+           </Link>
+        </div>
       </div>
 
       {/* Stats */}
@@ -372,6 +417,12 @@ const Dashboard = () => {
           currencyFmt={fmt}
           delay={1}
         />
+        <MobileCalcShortcut to="/calculator" style={{ width: '100%', marginTop: '16px' }}>
+          <div className="logo-container">
+            <CalcIcon size={22} />
+          </div>
+          <span className="text">Need Calculator?</span>
+        </MobileCalcShortcut>
       </div>
 
       <div className="dashboard-grid">
@@ -519,6 +570,22 @@ const Dashboard = () => {
 
         {/* Right column */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+          {/* Calculator Shortcut Card */}
+          <Link to="/calculator" style={{ textDecoration: 'none' }}>
+            <div className="card fade-up desktop-only" style={{ border: '1px solid var(--accent-light)', background: 'linear-gradient(135deg, var(--bg-surface), var(--accent-dim))', cursor: 'pointer', padding: '12px 16px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                <div style={{ width: 36, height: 36, background: 'var(--accent)', borderRadius: 'var(--r-md)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff' }}>
+                  <CalcIcon size={20} />
+                </div>
+                <div>
+                  <p style={{ fontWeight: 700, color: 'var(--text-1)', fontSize: '1rem' }}>Calculator</p>
+                  <p style={{ fontSize: '0.82rem', color: 'var(--text-3)' }}>Quickly calculate budgets & splits</p>
+                </div>
+                <ArrowRight size={20} color="var(--accent)" style={{ marginLeft: 'auto' }} />
+              </div>
+            </div>
+          </Link>
+
           {/* Account balances */}
           <div className="card fade-up">
             <div className="section-header">

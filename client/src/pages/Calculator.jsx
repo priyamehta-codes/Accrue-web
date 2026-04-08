@@ -6,31 +6,48 @@ import Layout from '../components/Layout';
 import BackButton from '../components/BackButton';
 
 const CalcContainer = styled.div`
-  max-width: 400px;
-  margin: 0 auto;
+  max-width: 440px;
+  margin: 20px auto;
   display: flex;
   flex-direction: column;
-  gap: 20px;
-  padding: 10px;
+  gap: 24px;
+  padding: 24px;
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r-2xl);
+  box-shadow: var(--shadow-lg);
+  position: relative;
 
   @media (max-width: 768px) {
     max-width: 100%;
-    padding: 0;
+    margin: 10px 0;
+    padding: 16px;
+    border-radius: var(--r-xl);
+  }
+
+  &::before {
+    content: '';
+    position: absolute;
+    top: -1px; left: -1px; right: -1px; bottom: -1px;
+    background: linear-gradient(135deg, var(--accent-light), transparent, var(--accent-light));
+    border-radius: inherit;
+    z-index: -1;
+    opacity: 0.15;
   }
 `;
 
 const DisplayWrapper = styled(motion.div)`
-  background: var(--bg-surface);
+  background: var(--bg-base);
   border: 1px solid var(--border);
-  border-radius: var(--r-xl);
-  padding: 30px;
+  border-radius: var(--r-lg);
+  padding: 24px;
   display: flex;
   flex-direction: column;
   align-items: flex-end;
   justify-content: flex-end;
-  min-height: 160px;
-  gap: 8px;
-  box-shadow: var(--shadow-md);
+  min-height: 140px;
+  gap: 4px;
+  box-shadow: inset 0 2px 4px rgba(0,0,0,0.05);
   position: relative;
   overflow: hidden;
 
@@ -54,15 +71,16 @@ const Formula = styled.div`
 `;
 
 const Result = styled.div`
-  font-size: 3rem;
+  font-size: 3.2rem;
   font-weight: 800;
   color: var(--text-1);
   line-height: 1;
   word-break: break-all;
   text-align: right;
+  z-index: 1;
 
   @media (max-width: 480px) {
-    font-size: 2.4rem;
+    font-size: 2.6rem;
   }
 `;
 
@@ -77,22 +95,24 @@ const Keypad = styled.div`
 `;
 
 const CalcButton = styled(motion.button)`
-  height: 70px;
-  border-radius: var(--r-lg);
+  height: 64px;
+  border-radius: var(--r-md);
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 1.4rem;
+  font-size: 1.3rem;
   font-weight: 600;
   border: 1px solid var(--border);
   background: ${(props) => props.$type === 'op' ? 'var(--accent-dim)' : props.$type === 'action' ? 'var(--bg-overlay)' : 'var(--bg-surface)'};
   color: ${(props) => props.$type === 'op' ? 'var(--accent-light)' : 'var(--text-1)'};
   cursor: pointer;
   outline: none;
-  transition: border-color var(--transition);
+  transition: all var(--transition);
 
   &:hover {
     border-color: var(--accent-light);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
     background: ${(props) => props.$type === 'op' ? 'var(--accent)' : 'var(--bg-hover)'};
     color: ${(props) => props.$type === 'op' ? '#fff' : 'var(--text-1)'};
   }
