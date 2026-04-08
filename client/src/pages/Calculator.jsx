@@ -4,6 +4,19 @@ import styled from 'styled-components';
 import { motion, AnimatePresence } from 'framer-motion';
 import Layout from '../components/Layout';
 import BackButton from '../components/BackButton';
+import { createGlobalStyle } from 'styled-components';
+
+const CalculatorLayoutFix = createGlobalStyle`
+  @media (max-width: 768px) {
+    .calculator-layout {
+      padding-bottom: 68px !important; 
+      padding-top: 50px !important;
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+    }
+  }
+`;
 
 const CalcContainer = styled.div`
   max-width: 440px;
@@ -20,10 +33,12 @@ const CalcContainer = styled.div`
 
   @media (max-width: 768px) {
     max-width: 100%;
-    margin: 0 auto;
-    padding: 16px 16px 32px 16px;
-    border-radius: var(--r-xl);
-    gap: 16px;
+    margin: 0;
+    padding: 12px;
+    border-radius: 0;
+    border: none;
+    min-height: calc(100vh - 160px);
+    gap: 12px;
   }
 
   &::before {
@@ -53,8 +68,9 @@ const DisplayWrapper = styled(motion.div)`
   overflow: hidden;
 
   @media (max-width: 768px) {
-    min-height: 100px;
-    padding: 16px;
+    flex: 1;
+    min-height: 160px;
+    padding: 30px 20px;
   }
 
   &::after {
@@ -138,8 +154,9 @@ const CalcButton = styled(motion.button)`
   `}
 
   @media (max-width: 480px) {
-    height: 56px;
-    font-size: 1.15rem;
+    height: 72px;
+    font-size: 1.5rem;
+    border-radius: var(--r-lg);
   }
 `;
 
@@ -235,7 +252,8 @@ const Calculator = () => {
     }, [handleInput]);
 
     return (
-        <Layout>
+        <Layout mainClassName="calculator-layout">
+            <CalculatorLayoutFix />
             <BackButton />
             
             <div className="page-header" style={{ marginTop: 0 }}>

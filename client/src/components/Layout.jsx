@@ -2,10 +2,10 @@ import React from 'react';
 import Sidebar from './Sidebar';
 import BottomNav from './BottomNav';
 
-const Layout = ({ children, onTxAdded }) => (
+const Layout = ({ children, onTxAdded, mainClassName = '' }) => (
   <div className="app-shell">
     <Sidebar />
-    <main className="main-content">{children}</main>
+    <main className={`main-content ${mainClassName}`}>{children}</main>
     <BottomNav onTxAdded={onTxAdded} />
   </div>
 );
