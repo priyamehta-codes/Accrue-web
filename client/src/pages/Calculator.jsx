@@ -10,10 +10,8 @@ const CalculatorLayoutFix = createGlobalStyle`
   @media (max-width: 768px) {
     .calculator-layout {
       padding-bottom: 68px !important; 
-      padding-top: 50px !important;
       display: flex;
       flex-direction: column;
-      height: 100vh;
     }
   }
 `;
@@ -68,9 +66,8 @@ const DisplayWrapper = styled(motion.div)`
   overflow: hidden;
 
   @media (max-width: 768px) {
-    flex: 1;
-    min-height: 160px;
-    padding: 30px 20px;
+    min-height: 120px;
+    padding: 24px 20px;
   }
 
   &::after {
@@ -256,10 +253,10 @@ const Calculator = () => {
             <CalculatorLayoutFix />
             <BackButton />
             
-            <div className="page-header" style={{ marginTop: 0 }}>
+            <div className="page-header">
                 <div>
-                    <h1 className="page-title" style={{ fontSize: 'var(--mobile-title-size, 1.3rem)' }}>Calculator</h1>
-                    <p className="page-subtitle desktop-only">Quick calculations for your budget</p>
+                    <h1 className="page-title" style={{ fontSize: 'var(--mobile-title-size, 1.4rem)' }}>Calculator</h1>
+                    <p className="page-subtitle">Quickly calculate budgets & splits</p>
                 </div>
                 <div className="desktop-only" style={{ background: 'var(--accent-dim)', color: 'var(--accent-light)', padding: '8px 12px', borderRadius: 'var(--r-md)', display: 'flex', alignItems: 'center', gap: 8 }}>
                     <CalcIcon size={18} />
