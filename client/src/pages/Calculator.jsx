@@ -175,9 +175,10 @@ const Calculator = () => {
                 setResult(current + val);
                 setFormula(formula + val);
             }
-            setLastAction('num');
         } else if (['+', '-', '×', '÷'].includes(val)) {
-            if (lastAction === 'op') {
+            if (lastAction === 'equal') {
+                setFormula(result + val);
+            } else if (lastAction === 'op') {
                 setFormula(formula.slice(0, -1) + val);
             } else {
                 setFormula(formula + val);
