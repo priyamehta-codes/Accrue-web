@@ -13,6 +13,7 @@ import Splits      from './pages/Splits';
 import Analytics   from './pages/Analytics';
 import Settings    from './pages/Settings';
 import Calculator  from './pages/Calculator';
+import Notes       from './pages/Notes';
 import Landing     from './pages/Landing';
 
 const Home = () => {
@@ -40,6 +41,7 @@ const AppRoutes = () => {
       <Route path="/analytics" element={<ProtectedRoute><Analytics /></ProtectedRoute>} />
       <Route path="/settings" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
       <Route path="/calculator" element={<ProtectedRoute><Calculator /></ProtectedRoute>} />
+      <Route path="/notes" element={<ProtectedRoute><Notes /></ProtectedRoute>} />
 
       {/* Catch-all */}
       <Route path="*" element={<Navigate to="/" replace />} />

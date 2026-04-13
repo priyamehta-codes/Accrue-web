@@ -1,6 +1,6 @@
 import React, { useState, useCallback } from 'react';
 import { Link } from 'react-router-dom';
-import { TrendingUp, TrendingDown, Wallet, Users, Receipt, ArrowRight, PieChart as PieIcon, Calculator as CalcIcon } from 'lucide-react';
+import { TrendingUp, TrendingDown, Wallet, Users, Receipt, ArrowRight, PieChart as PieIcon, Calculator as CalcIcon, StickyNote } from 'lucide-react';
 import { motion } from 'framer-motion';
 import styled from 'styled-components';
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from 'recharts';
@@ -328,44 +328,54 @@ const StatSideStack = styled.div`
   }
 `;
 
-const MobileCalcShortcut = styled(Link)`
+const MobileToolsContainer = styled.div`
   display: none;
   @media (max-width: 768px) {
     display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 12px;
     background: var(--bg-surface);
     border: 1px solid var(--border);
     border-radius: var(--r-lg);
-    padding: 12px;
     margin-top: 16px;
-    text-decoration: none;
-    color: var(--text-1);
-    transition: all var(--transition);
-
-    &:hover {
-      border-color: var(--accent-light);
-      background: var(--bg-hover);
-    }
-    
-    .logo-container {
-      width: 36px;
-      height: 36px;
-      background: var(--accent-dim);
-      border-radius: 10px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      color: var(--accent-light);
-    }
-
-    .text {
-      font-weight: 700;
-      font-size: 1.1rem;
-      color: var(--accent);
-    }
     grid-column: 1 / -1;
+    overflow: hidden;
+    box-shadow: var(--shadow-sm);
+  }
+`;
+
+const MobileToolBtn = styled(Link)`
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 12px;
+  text-decoration: none;
+  color: var(--text-1);
+  transition: all var(--transition);
+
+  &:first-child {
+    border-right: 1px solid var(--border);
+  }
+
+  &:hover {
+    background: var(--bg-hover);
+  }
+
+  .icon-box {
+    width: 32px;
+    height: 32px;
+    background: var(--accent-dim);
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--accent);
+  }
+
+  .label-text {
+    font-weight: 700;
+    font-size: 1rem;
+    color: var(--accent);
   }
 `;
 
@@ -400,7 +410,10 @@ const Dashboard = () => {
           <h1 className="page-title">{getGreeting()}, {user?.name?.split(' ')[0] || 'User'}</h1>
           <p className="page-subtitle">{d.month} overview</p>
         </div>
-        <div className="dashboard-header-right" >
+        <div className="dashboard-header-right" style={{ display: 'flex', gap: '8px' }}>
+           <Link to="/notes" className="btn btn-icon btn-secondary desktop-only" title="Notes">
+             <StickyNote size={18} />
+           </Link>
            <Link to="/calculator" className="btn btn-icon btn-secondary desktop-only" title="Calculator">
              <CalcIcon size={18} />
            </Link>
@@ -417,12 +430,16 @@ const Dashboard = () => {
           currencyFmt={fmt}
           delay={1}
         />
-        <MobileCalcShortcut to="/calculator" style={{ width: '100%', marginTop: '16px' }}>
-          <div className="logo-container">
-            <CalcIcon size={22} />
-          </div>
-          <span className="text">Need Calculator?</span>
-        </MobileCalcShortcut>
+        <MobileToolsContainer>
+          <MobileToolBtn to="/calculator">
+            <div className="icon-box"><CalcIcon size={20} /></div>
+            <span className="label-text">Calculator</span>
+          </MobileToolBtn>
+          <MobileToolBtn to="/notes">
+            <div className="icon-box" style={{ background: 'var(--bg-elevated)', color: 'var(--text-2)' }}><StickyNote size={20} /></div>
+            <span className="label-text" style={{ color: 'var(--text-1)' }}>Notes</span>
+          </MobileToolBtn>
+        </MobileToolsContainer>
       </div>
 
       <div className="dashboard-grid">
@@ -582,6 +599,22 @@ const Dashboard = () => {
                   <p style={{ fontSize: '0.82rem', color: 'var(--text-3)' }}>Quickly calculate budgets & splits</p>
                 </div>
                 <ArrowRight size={20} color="var(--accent)" style={{ marginLeft: 'auto' }} />
+              </div>
+            </div>
+          </Link>
+
+          {/* Notes Shortcut Card */}
+          <Link to="/notes" style={{ textDecoration: 'none' }}>
+            <div className="card fade-up" style={{ border: '1px solid var(--border)', background: 'var(--bg-surface)', cursor: 'pointer', padding: '12px 16px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                <div style={{ width: 36, height: 36, background: 'var(--accent-dim)', borderRadius: 'var(--r-md)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--accent)' }}>
+                  <StickyNote size={20} />
+                </div>
+                <div>
+                  <p style={{ fontWeight: 700, color: 'var(--text-1)', fontSize: '1rem' }}>Notes</p>
+                  <p style={{ fontSize: '0.82rem', color: 'var(--text-3)' }}>Jot down your daily reminders</p>
+                </div>
+                <ArrowRight size={20} color="var(--text-3)" style={{ marginLeft: 'auto' }} />
               </div>
             </div>
           </Link>
