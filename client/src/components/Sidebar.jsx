@@ -4,7 +4,7 @@ import { useAuth } from '../context/AuthContext';
 import {
   LayoutDashboard, Wallet, ArrowLeftRight, Receipt, Users,
   LogOut, Menu, X, TrendingUp, BarChart2, Github,
-  Sun, Moon, Settings as SettingsIcon, Calculator as CalcIcon
+  Sun, Moon, Settings as SettingsIcon, Calculator as CalcIcon, StickyNote
 } from 'lucide-react';
 import useCachedFetch from '../hooks/useCachedFetch';
 import { getDashboard, getCachedDashboard } from '../api/dashboard';
@@ -18,6 +18,7 @@ const routes = [
   { to: '/splits',       label: 'Splits',       Icon: Users,            key: 'splits'    },
   { to: '/calculator',   label: 'Calculator',   Icon: CalcIcon,         key: 'calculator' },
   { to: '/settings',     label: 'Settings',     Icon: SettingsIcon,     key: 'settings'  },
+  { to: '/notes',        label: 'Notes',        Icon: StickyNote,       key: 'notes'     },
 ];
 
 const Sidebar = () => {
