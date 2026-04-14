@@ -1,11 +1,12 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Trash2, StickyNote, PenTool, Calendar } from 'lucide-react';
 import styled from 'styled-components';
 import { motion, AnimatePresence } from 'framer-motion';
 import Layout from '../components/Layout';
 import Loader from '../components/newloader';
 import BackButton from '../components/BackButton';
-import { getNotes, createNote, deleteNote } from '../api/notes';
+import { getNotes, getCachedNotes, createNote, deleteNote } from '../api/notes';
+import useCachedFetch from '../hooks/useCachedFetch';
 
 const NotesContainer = styled.div`
   max-width: 900px;
@@ -155,25 +156,17 @@ const NoteCard = styled(motion.div)`
 `;
 
 const Notes = () => {
-  const [notes, setNotes] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const fetch = useCallback(getNotes, []);
+  const { data: cachedNotes, isLoading, refresh } = useCachedFetch(fetch, getCachedNotes);
+  const [notes, setNotes] = useState(cachedNotes || []);
   const [content, setContent] = useState('');
   const [saving, setSaving] = useState(false);
 
-  const fetchNotes = async () => {
-    try {
-      const data = await getNotes();
-      setNotes(data);
-    } catch (err) {
-      console.error(err);
-    } finally {
-      setLoading(false);
-    }
-  };
-
   useEffect(() => {
-    fetchNotes();
-  }, []);
+    if (cachedNotes) {
+      setNotes(cachedNotes);
+    }
+  }, [cachedNotes]);
 
   const handleAddNote = async (e) => {
     e.preventDefault();
@@ -183,6 +176,7 @@ const Notes = () => {
       const newNote = await createNote(content);
       setNotes([newNote, ...notes]);
       setContent('');
+      refresh();
     } catch (err) {
       console.error(err);
     } finally {
@@ -194,13 +188,14 @@ const Notes = () => {
     try {
       await deleteNote(id);
       setNotes((prevNotes) => prevNotes.filter(n => n._id !== id));
+      refresh();
     } catch (err) {
       console.error(err);
     }
   };
 
-  if (loading) {
-    return <Layout><div className="loading-overlay"><Loader /></div></Layout>;
+  if (isLoading && !cachedNotes && notes.length === 0) {
+    return <Layout><div className="loading-overlay"><Loader /><p style={{ marginTop: 12, color: 'var(--text-3)', fontWeight: 600 }}>Loading notes...</p></div></Layout>;
   }
 
   return (
