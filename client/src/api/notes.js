@@ -1,8 +1,16 @@
 import api from './axios';
 
+const CACHE_KEY = 'accrue_notes';
+const save = (data) => { try { localStorage.setItem(CACHE_KEY, JSON.stringify(data)); } catch {} };
+
 export const getNotes = async () => {
   const res = await api.get('/notes');
+  save(res.data);
   return res.data;
+};
+
+export const getCachedNotes = () => {
+  try { return JSON.parse(localStorage.getItem(CACHE_KEY)) || null; } catch { return null; }
 };
 
 export const createNote = async (content) => {
