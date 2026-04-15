@@ -5,6 +5,9 @@ import { motion, AnimatePresence } from 'framer-motion';
 import Layout from '../components/Layout';
 import BackButton from '../components/BackButton';
 import { createGlobalStyle } from 'styled-components';
+import {useCachedState} from '../hooks/useCachedState';
+
+
 
 const CalculatorLayoutFix = createGlobalStyle`
   @media (max-width: 768px) {
@@ -157,10 +160,43 @@ const CalcButton = styled(motion.button)`
   }
 `;
 
+const LastResultBadge = styled(motion.div)`
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 16px;
+  background: var(--bg-base);
+  border: 1px solid var(--border);
+  border-radius: var(--r-lg);
+  font-size: 0.85rem;
+  color: var(--text-3);
+
+  span.value {
+    margin-left: auto;
+    font-weight: 700;
+    font-size: 1rem;
+    color: var(--accent-light);
+  }
+
+  button {
+    background: var(--accent-dim);
+    color: var(--accent-light);
+    border: none;
+    border-radius: var(--r-sm);
+    padding: 3px 10px;
+    font-size: 0.78rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background var(--transition);
+    &:hover { background: var(--accent); color: #fff; }
+  }
+`;
+
 const Calculator = () => {
     const [formula, setFormula] = useState('');
     const [result, setResult] = useState('0');
     const [lastAction, setLastAction] = useState(null);
+    const [lastCalc, setLastCalc] = useCachedState('calc_last_result', null);
 
     const calculate = useCallback((expr) => {
         try {
@@ -207,8 +243,11 @@ const Calculator = () => {
         } else if (val === '=') {
             const res = calculate(formula);
             setResult(res);
-            setFormula(formula); // Keep formula for history or clear? Let's keep it until next num
+            setFormula(formula);
             setLastAction('equal');
+            if (res !== 'Error' && res !== '0') {
+                setLastCalc({ value: res, formula });
+            }
         } else if (val === 'AC') {
             setFormula('');
             setResult('0');
@@ -272,6 +311,26 @@ const Calculator = () => {
                     <Formula>{formula || ' '}</Formula>
                     <Result>{result}</Result>
                 </DisplayWrapper>
+
+                {lastCalc && (
+                    <LastResultBadge
+                        initial={{ opacity: 0, y: -8 }}
+                        animate={{ opacity: 1, y: 0 }}
+                    >
+                        <span>Last: <em style={{ color: 'var(--text-2)', fontStyle: 'normal' }}>{lastCalc.formula} =</em></span>
+                        <span className="value">{lastCalc.value}</span>
+                        <button
+                            title="Recall last result"
+                            onClick={() => {
+                                setFormula(lastCalc.value);
+                                setResult(lastCalc.value);
+                                setLastAction(null);
+                            }}
+                        >
+                            Recall
+                        </button>
+                    </LastResultBadge>
+                )}
 
                 <Keypad>
                     <CalcButton $type="action" onClick={() => handleInput('AC')} whileTap={{ scale: 0.95 }}>
