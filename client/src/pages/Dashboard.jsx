@@ -612,7 +612,7 @@ const Dashboard = () => {
                 </div>
                 <div>
                   <p style={{ fontWeight: 700, color: 'var(--text-1)', fontSize: '1rem' }}>Notes</p>
-                  <p style={{ fontSize: '0.82rem', color: 'var(--text-3)' }}>Jot down your daily reminders</p>
+                  <p style={{ fontSize: '0.82rem', color: 'var(--text-3)' }}>Note down your daily reminders</p>
                 </div>
                 <ArrowRight size={20} color="var(--text-3)" style={{ marginLeft: 'auto' }} />
               </div>
