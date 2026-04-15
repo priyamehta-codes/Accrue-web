@@ -256,7 +256,7 @@ const SavingsCard = ({ month, totalBalance, earned, spend, currencyFmt, delay })
     >
       <Link to="/transactions?type=expense" style={{ textDecoration: 'none' }} className="header">
         <span className="month-title">{month} Total Expense</span>
-        <h2 className="savings-amount" style={{ color: 'var(--danger)' }}>{currencyFmt(spend)}</h2>
+        <h2 className="savings-amount" style={{ color: '#d35d13eb' }}>{currencyFmt(spend)}</h2>
       </Link>
 
       <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
