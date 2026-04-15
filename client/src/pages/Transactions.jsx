@@ -6,7 +6,7 @@ import BackButton from '../components/BackButton';
 import Modal from '../components/Modal';
 import Loader from '../components/newloader';
 import useCachedFetch from '../hooks/useCachedFetch';
-import { getTransactions, getCachedTransactions, createTransaction, deleteTransaction } from '../api/transactions';
+import { getTransactions, getCachedTransactions, createTransaction, deleteTransaction, updateTransaction } from '../api/transactions';
 import { getAccounts, getCachedAccounts } from '../api/accounts';
 
 const fmt = (n) =>
