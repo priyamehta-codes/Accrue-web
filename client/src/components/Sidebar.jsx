@@ -17,8 +17,8 @@ const routes = [
   { to: '/bills',        label: 'Bills',        Icon: Receipt,          key: 'bills'     },
   { to: '/splits',       label: 'Splits',       Icon: Users,            key: 'splits'    },
   { to: '/calculator',   label: 'Calculator',   Icon: CalcIcon,         key: 'calculator' },
-  { to: '/settings',     label: 'Settings',     Icon: SettingsIcon,     key: 'settings'  },
   { to: '/notes',        label: 'Notes',        Icon: StickyNote,       key: 'notes'     },
+  { to: '/settings',     label: 'Settings',     Icon: SettingsIcon,     key: 'settings'  },
 ];
 
 const Sidebar = () => {
