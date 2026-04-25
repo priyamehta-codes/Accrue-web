@@ -24,6 +24,14 @@ const userSchema = new mongoose.Schema(
       type: String,
       default: '',
     },
+    pin: {
+      type: String,
+      default: null,
+    },
+    isPinEnabled: {
+      type: Boolean,
+      default: false,
+    },
   },
   { timestamps: true }
 );
