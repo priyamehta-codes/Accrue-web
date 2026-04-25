@@ -8,6 +8,7 @@ import Loader from '../components/newloader';
 import useCachedFetch from '../hooks/useCachedFetch';
 import { getTransactions, getCachedTransactions, createTransaction, deleteTransaction, updateTransaction } from '../api/transactions';
 import { getAccounts, getCachedAccounts } from '../api/accounts';
+import PrivacyLock from '../components/PrivacyLock';
 
 const fmt = (n) =>
   new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', maximumFractionDigits: 0 }).format(n ?? 0);
@@ -143,56 +144,58 @@ const Transactions = () => {
         ))}
       </div>
 
-      {!filtered.length ? (
-        <div className="empty-state" style={{ marginTop: 40 }}>
-          <div className="empty-state-icon">📋</div>
-          <h3>No transactions found</h3>
-          <p>Add your first transaction or adjust your filters.</p>
-        </div>
-      ) : (
-        <div className="card">
-          <div className="tx-list">
-            {filtered.map((tx, idx) => {
-              const balanceAfter = getBalanceAfter(tx, idx);
-              return (
-                <div key={tx._id} className="tx-item" style={{ borderBottom: '1px solid var(--border)', cursor: 'pointer' }} onClick={() => setSelectedTx(tx)}>
-                  <div className="tx-icon" style={{ background: typeColor[tx.type] + '22' }}>
-                    <span style={{ fontSize: '1.1rem' }}>{tx.type === 'income' ? '↓' : tx.type === 'expense' ? '↑' : '⇄'}</span>
-                  </div>
-                  <div className="tx-info" style={{ minWidth: 0, flex: 1, overflow: 'hidden' }}>
-                    <p className="tx-title" style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{tx.note || tx.category}</p>
-                    <div style={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: 4 }}>
-                      <span className="badge" style={{ background: typeColor[tx.type] + '22', color: typeColor[tx.type], textTransform: 'capitalize' }}>
-                        {tx.type === 'transfer' ? 'self transfer' : tx.type}
-                      </span>
-                      {tx.reference === 'split_payment' && (
-                        <span className="badge" style={{ background: 'var(--accent-dim)', color: 'var(--accent-light)' }}>Split Payment</span>
-                      )}
-                      {tx.reference === 'split_settlement' && (
-                        <span className="badge" style={{ background: 'var(--success-dim)', color: 'var(--success)' }}>Settlement</span>
-                      )}
-                      <p className="tx-meta" style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                        {tx.accountId?.name} · {fmtDate(tx.date)}
-                      </p>
-                    </div>
-                    {balanceAfter !== null && (
-                      <p style={{ fontSize: '0.7rem', color: 'var(--text-3)', fontStyle: 'italic', marginTop: 2 }}>
-                        Balance after: {fmt(balanceAfter)}
-                      </p>
-                    )}
-                  </div>
-                  <span className="tx-amount" style={{ color: typeColor[tx.type], flexShrink: 0 }}>
-                    {typeSign[tx.type]}{fmt(tx.amount)}
-                  </span>
-                  <button className="btn btn-icon btn-danger" style={{ marginLeft: 8, flexShrink: 0 }} onClick={(e) => handleDelete(e, tx._id)} title="Delete">
-                    <Trash2 size={14} />
-                  </button>
-                </div>
-              );
-            })}
+      <PrivacyLock>
+        {!filtered.length ? (
+          <div className="empty-state" style={{ marginTop: 40 }}>
+            <div className="empty-state-icon">📋</div>
+            <h3>No transactions found</h3>
+            <p>Add your first transaction or adjust your filters.</p>
           </div>
-        </div>
-      )}
+        ) : (
+          <div className="card">
+            <div className="tx-list">
+              {filtered.map((tx, idx) => {
+                const balanceAfter = getBalanceAfter(tx, idx);
+                return (
+                  <div key={tx._id} className="tx-item" style={{ borderBottom: '1px solid var(--border)', cursor: 'pointer' }} onClick={() => setSelectedTx(tx)}>
+                    <div className="tx-icon" style={{ background: typeColor[tx.type] + '22' }}>
+                      <span style={{ fontSize: '1.1rem' }}>{tx.type === 'income' ? '↓' : tx.type === 'expense' ? '↑' : '⇄'}</span>
+                    </div>
+                    <div className="tx-info" style={{ minWidth: 0, flex: 1, overflow: 'hidden' }}>
+                      <p className="tx-title" style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{tx.note || tx.category}</p>
+                      <div style={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: 4 }}>
+                        <span className="badge" style={{ background: typeColor[tx.type] + '22', color: typeColor[tx.type], textTransform: 'capitalize' }}>
+                          {tx.type === 'transfer' ? 'self transfer' : tx.type}
+                        </span>
+                        {tx.reference === 'split_payment' && (
+                          <span className="badge" style={{ background: 'var(--accent-dim)', color: 'var(--accent-light)' }}>Split Payment</span>
+                        )}
+                        {tx.reference === 'split_settlement' && (
+                          <span className="badge" style={{ background: 'var(--success-dim)', color: 'var(--success)' }}>Settlement</span>
+                        )}
+                        <p className="tx-meta" style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                          {tx.accountId?.name} · {fmtDate(tx.date)}
+                        </p>
+                      </div>
+                      {balanceAfter !== null && (
+                        <p style={{ fontSize: '0.7rem', color: 'var(--text-3)', fontStyle: 'italic', marginTop: 2 }}>
+                          Balance after: {fmt(balanceAfter)}
+                        </p>
+                      )}
+                    </div>
+                    <span className="tx-amount" style={{ color: typeColor[tx.type], flexShrink: 0 }}>
+                      {typeSign[tx.type]}{fmt(tx.amount)}
+                    </span>
+                    <button className="btn btn-icon btn-danger" style={{ marginLeft: 8, flexShrink: 0 }} onClick={(e) => handleDelete(e, tx._id)} title="Delete">
+                      <Trash2 size={14} />
+                    </button>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        )}
+      </PrivacyLock>
 
       {/* Detail Modal */}
       <Modal isOpen={!!selectedTx} onClose={() => setSelectedTx(null)} title="Transaction Details">

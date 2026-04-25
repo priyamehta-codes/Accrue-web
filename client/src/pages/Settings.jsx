@@ -7,15 +7,20 @@ import Layout from '../components/Layout';
 import BackButton from '../components/BackButton';
 import { useAuth } from '../context/AuthContext';
 import Switch from '../components/toggele';
-import { updateProfile } from '../api/auth';
+import { updateProfile, updatePin as apiUpdatePin } from '../api/auth';
 import { getDashboard } from '../api/dashboard';
-import { RefreshCw } from 'lucide-react';
+import { RefreshCw, Lock, LockKeyhole } from 'lucide-react';
 
 const Settings = () => {
   const { user, logout, updateUser } = useAuth();
   const [name, setName] = useState(user?.name || '');
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
+  
+  const [pin, setPin] = useState('');
+  const [isPinEnabled, setIsPinEnabled] = useState(user?.isPinEnabled || false);
+  const [pinLoading, setPinLoading] = useState(false);
+  const [pinSuccess, setPinSuccess] = useState(false);
   
   // Theme logic mirrored from Sidebar
   const [isDark, setIsDark] = useState(() => localStorage.getItem('accrue-theme') === 'dark');
@@ -59,6 +64,37 @@ const Settings = () => {
       console.error('Sync failed:', err);
     } finally {
       setSyncing(false);
+    }
+  };
+
+  const handleUpdatePin = async (e) => {
+    if (e) e.preventDefault();
+    setPinLoading(true);
+    try {
+      const data = await apiUpdatePin(pin || undefined, isPinEnabled);
+      updateUser({ ...user, isPinEnabled: data.isPinEnabled, hasPin: data.hasPin });
+      setPinSuccess(true);
+      setPin('');
+      setTimeout(() => setPinSuccess(false), 3000);
+    } catch (err) {
+      console.error('Failed to update PIN:', err);
+      alert(err?.response?.data?.message || 'Failed to update PIN.');
+    } finally {
+      setPinLoading(false);
+    }
+  };
+
+  const handleTogglePin = async (checked) => {
+    setIsPinEnabled(checked);
+    // If enabling and user has no pin, they must set one, 
+    // but the backend will handle that or we can just send the toggle.
+    // To be safe, we only toggle here and save.
+    try {
+      const data = await apiUpdatePin(undefined, checked);
+      updateUser({ ...user, isPinEnabled: data.isPinEnabled, hasPin: data.hasPin });
+    } catch (err) {
+      console.error('Toggle PIN failed:', err);
+      setIsPinEnabled(!checked);
     }
   };
 
@@ -147,52 +183,106 @@ const Settings = () => {
           </section>
 
           {/* Preferences Section */}
-          <section className="settings-section card">
-            <div className="section-header">
-              <div className="header-left">
-                <Shield size={20} className="icon-accent" />
-                <h3>Preferences</h3>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
+            <section className="settings-section card">
+              <div className="section-header">
+                <div className="header-left">
+                  <Shield size={20} className="icon-accent" />
+                  <h3>Preferences</h3>
+                </div>
               </div>
-            </div>
 
-            <div className="preference-item">
-              <div className="preference-info">
-                <p className="preference-title">Dark Mode</p>
-                <p className="preference-desc">Switch between light and dark themes</p>
+              <div className="preference-item">
+                <div className="preference-info">
+                  <p className="preference-title">Dark Mode</p>
+                  <p className="preference-desc">Switch between light and dark themes</p>
+                </div>
+                <Switch checked={isDark} onChange={handleThemeChange} />
               </div>
-              <Switch checked={isDark} onChange={handleThemeChange} />
-            </div>
 
-            <div className="divider" />
+              <div className="divider" />
 
-            <div className="preference-item">
-              <div className="preference-info">
-                <p className="preference-title">Refresh Dashboard</p>
-                <p className="preference-desc">Manually sync dashboard data with server</p>
+              <div className="preference-item">
+                <div className="preference-info">
+                  <p className="preference-title">Refresh Dashboard</p>
+                  <p className="preference-desc">Manually sync dashboard data with server</p>
+                </div>
+                <button 
+                  className="btn btn-secondary btn-sm" 
+                  onClick={handleSyncData} 
+                  disabled={syncing}
+                >
+                  <RefreshCw size={14} className={syncing ? 'spin-once' : ''} />
+                  {syncing ? 'Syncing...' : 'Refresh'}
+                </button>
               </div>
-              <button 
-                className="btn btn-secondary btn-sm" 
-                onClick={handleSyncData} 
-                disabled={syncing}
-              >
-                <RefreshCw size={14} className={syncing ? 'spin-once' : ''} />
-                {syncing ? 'Syncing...' : 'Refresh'}
-              </button>
-            </div>
+            </section>
 
-            <div className="divider" />
-
-            <div className="preference-item danger-zone">
-              <div className="preference-info">
-                <p className="preference-title">Sign Out</p>
-                <p className="preference-desc">Sign out of your account on this device</p>
+            {/* Privacy Section */}
+            <section className="settings-section card">
+              <div className="section-header">
+                <div className="header-left">
+                  <LockKeyhole size={20} className="icon-accent" style={{ color: 'var(--warning)' }} />
+                  <h3>Privacy & Security</h3>
+                </div>
               </div>
-              <button className="btn btn-danger btn-sm" onClick={logout}>
-                Sign Out
-                <LogOut size={16} />
-              </button>
-            </div>
-          </section>
+
+              <div className="preference-item">
+                <div className="preference-info">
+                  <p className="preference-title">Enable Privacy PIN</p>
+                  <p className="preference-desc">Require PIN to view transactions on dashboard</p>
+                </div>
+                <Switch checked={isPinEnabled} onChange={handleTogglePin} />
+              </div>
+
+              <div className="divider" />
+
+              <form onSubmit={handleUpdatePin}>
+                <div className="form-group">
+                  <label className="form-label">Set New PIN</label>
+                  <div className="input-with-icon">
+                    <Lock size={18} className="input-icon" />
+                    <input 
+                      type="password" 
+                      inputMode="numeric"
+                      pattern="[0-9]*"
+                      maxLength={4}
+                      className="form-input" 
+                      value={pin} 
+                      onChange={(e) => setPin(e.target.value.replace(/\D/g, '').slice(0, 4))}
+                      placeholder={user?.hasPin ? "**** (Enter to change)" : "Set 4 digit PIN"}
+                    />
+                  </div>
+                  <p className="helper-text">Enter exactly 4 digits to set or change your privacy PIN.</p>
+                </div>
+
+                <div className="form-actions" style={{ marginTop: 16 }}>
+                  <button 
+                    type="submit" 
+                    className="btn btn-primary" 
+                    disabled={pinLoading || (pin.length > 0 && pin.length !== 4)}
+                    style={{ background: 'var(--warning)', borderColor: 'var(--warning)' }}
+                  >
+                    {pinLoading ? 'Updating...' : pinSuccess ? 'PIN Set!' : 'Update PIN'}
+                    {pinSuccess ? <CheckCircle size={18} /> : <Lock size={18} />}
+                  </button>
+                </div>
+              </form>
+
+              <div className="divider" />
+
+              <div className="preference-item danger-zone">
+                <div className="preference-info">
+                  <p className="preference-title">Sign Out</p>
+                  <p className="preference-desc">Sign out of your account on this device</p>
+                </div>
+                <button className="btn btn-danger btn-sm" onClick={logout}>
+                  Sign Out
+                  <LogOut size={16} />
+                </button>
+              </div>
+            </section>
+          </div>
         </SettingsGrid>
 
         <FooterSection>

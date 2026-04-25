@@ -11,6 +11,7 @@ import usePolling from '../hooks/usePolling';
 import { useAuth } from '../context/AuthContext';
 import { getDashboard, getCachedDashboard } from '../api/dashboard';
 import { createTransaction } from '../api/transactions';
+import PrivacyLock from '../components/PrivacyLock';
 
 const fmt = (n) =>
   new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', maximumFractionDigits: 0 }).format(n ?? 0);
@@ -491,207 +492,209 @@ const Dashboard = () => {
               <h3 className="card-title">Recent Transactions</h3>
               <Link to="/transactions" className="btn btn-sm btn-secondary" style={{ fontSize: '0.75rem', padding: '4px 10px' }}>View All</Link>
             </div>
-            {!d.recentTransactions?.length ? (
-              <div className="empty-state">
-                <span className="empty-state-icon">💳</span>
-                <p>No transactions yet</p>
-              </div>
-            ) : (
-              <div className="tx-list">
-                {d.recentTransactions.map((tx, idx) => {
-                  // Calculate "balance after" for recent transactions
-                  const getBalanceAfter = () => {
-                    const account = d.accounts?.find(a => a._id === tx.accountId?._id || a._id === tx.accountId);
-                    if (!account) return null;
-                    let balance = account.balance;
-                    // Note: This logic assumes recentTransactions are the MOST recent ones
-                    for (let i = 0; i < idx; i++) {
-                      const earlierTx = d.recentTransactions[i];
-                      if (earlierTx.accountId?._id === account._id || earlierTx.accountId === account._id) {
-                        const delta = { income: earlierTx.amount, expense: -earlierTx.amount, transfer: -earlierTx.amount }[earlierTx.type] || 0;
-                        balance -= delta;
+            <PrivacyLock>
+              {!d.recentTransactions?.length ? (
+                <div className="empty-state">
+                  <span className="empty-state-icon">💳</span>
+                  <p>No transactions yet</p>
+                </div>
+              ) : (
+                <div className="tx-list">
+                  {d.recentTransactions.map((tx, idx) => {
+                    // Calculate "balance after" for recent transactions
+                    const getBalanceAfter = () => {
+                      const account = d.accounts?.find(a => a._id === tx.accountId?._id || a._id === tx.accountId);
+                      if (!account) return null;
+                      let balance = account.balance;
+                      // Note: This logic assumes recentTransactions are the MOST recent ones
+                      for (let i = 0; i < idx; i++) {
+                        const earlierTx = d.recentTransactions[i];
+                        if (earlierTx.accountId?._id === account._id || earlierTx.accountId === account._id) {
+                          const delta = { income: earlierTx.amount, expense: -earlierTx.amount, transfer: -earlierTx.amount }[earlierTx.type] || 0;
+                          balance -= delta;
+                        }
                       }
-                    }
-                    return balance;
-                  };
-                  const balanceAfter = getBalanceAfter();
+                      return balance;
+                    };
+                    const balanceAfter = getBalanceAfter();
 
-                  return (
-                    <Link key={tx._id} to="/transactions" className="tx-item" style={{ textDecoration: 'none', color: 'inherit', cursor: 'pointer' }}>
-                      <div className="tx-icon" style={{ background: typeColor[tx.type] + '22' }}>
-                        {tx.type === 'income' ? '↓' : tx.type === 'expense' ? '↑' : '⇄'}
-                      </div>
-                      <div className="tx-info" style={{ minWidth: 0, flex: 1, overflow: 'hidden' }}>
-                        <p className="tx-title" style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{tx.note || tx.category}</p>
-                        <p className="tx-meta" style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                          {tx.accountId?.name} · {fmtDate(tx.date)}
-                        </p>
-                        {balanceAfter !== null && (
-                          <p style={{ fontSize: '0.7rem', color: 'var(--text-3)', fontStyle: 'italic' }}>
-                            Bal: {fmt(balanceAfter)}
+                    return (
+                      <Link key={tx._id} to="/transactions" className="tx-item" style={{ textDecoration: 'none', color: 'inherit', cursor: 'pointer' }}>
+                        <div className="tx-icon" style={{ background: typeColor[tx.type] + '22' }}>
+                          {tx.type === 'income' ? '↓' : tx.type === 'expense' ? '↑' : '⇄'}
+                        </div>
+                        <div className="tx-info" style={{ minWidth: 0, flex: 1, overflow: 'hidden' }}>
+                          <p className="tx-title" style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{tx.note || tx.category}</p>
+                          <p className="tx-meta" style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                            {tx.accountId?.name} · {fmtDate(tx.date)}
                           </p>
-                        )}
-                      </div>
-                      <span className="tx-amount" style={{ color: typeColor[tx.type] }}>
-                        {typeSign[tx.type]}{fmt(tx.amount)}
-                      </span>
-                    </Link>
-                  );
-                })}
-              </div>
-            )}
+                          {balanceAfter !== null && (
+                            <p style={{ fontSize: '0.7rem', color: 'var(--text-3)', fontStyle: 'italic' }}>
+                              Bal: {fmt(balanceAfter)}
+                            </p>
+                          )}
+                        </div>
+                        <span className="tx-amount" style={{ color: typeColor[tx.type] }}>
+                          {typeSign[tx.type]}{fmt(tx.amount)}
+                        </span>
+                      </Link>
+                    );
+                  })}
+                </div>
+              )}
+            </PrivacyLock>
           </div>
         </div>
 
-        {/* Expense Categories Chart (Hoisted for mobile ordering) */}
-        <Link to="/analytics" style={{ textDecoration: 'none' }} className="dashboard-chart-card">
-          <div className="card fade-up" style={{ cursor: 'pointer' }}>
-            <div className="section-header">
-              <span className="section-title">Expense Categories</span>
-              <PieIcon size={16} color="var(--text-3)" />
-            </div>
-            <div style={{ height: 220, width: '100%', marginTop: 10 }}>
-              {d.categoryData?.length > 0 ? (
-                <ResponsiveContainer width="100%" height="100%">
-                  <PieChart>
-                    <Pie
-                      data={d.categoryData}
-                      innerRadius={60}
-                      outerRadius={85}
-                      paddingAngle={5}
-                      dataKey="value"
-                      fill="#8884d8"
-                    >
-                      {d.categoryData.map((entry, index) => (
-                        <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} stroke="none" />
-                      ))}
-                    </Pie>
-                    <Tooltip 
-                      formatter={(val) => fmt(val)}
-                      contentStyle={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--r-md)', fontSize: '0.75rem', boxShadow: 'var(--shadow-lg)' }}
-                    />
-                    <text x="50%" y="50%" textAnchor="middle" dominantBaseline="middle">
-                       <tspan x="50%" dy="-0.5em" style={{ fontSize: '0.65rem', fontWeight: 600, fill: 'var(--text-3)', textTransform: 'uppercase' }}>Total</tspan>
-                       <tspan x="50%" dy="1.4em" style={{ fontSize: '1.1rem', fontWeight: 800, fill: 'var(--text-1)' }}>{fmt(d.monthlyExpense)}</tspan>
-                    </text>
-                  </PieChart>
-                </ResponsiveContainer>
-              ) : (
-                <div className="empty-state" style={{ padding: '20px' }}>
-                  <p style={{ fontSize: '0.8rem' }}>No expenses yet</p>
-                </div>
-              )}
-            </div>
-          </div>
-        </Link>
-
-        {/* Right column */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-          {/* Calculator Shortcut Card */}
-          <Link to="/calculator" style={{ textDecoration: 'none' }}>
-            <div className="card fade-up desktop-only" style={{ border: '1px solid var(--accent-light)', background: 'linear-gradient(135deg, var(--bg-surface), var(--accent-dim))', cursor: 'pointer', padding: '12px 16px' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                <div style={{ width: 36, height: 36, background: 'var(--accent)', borderRadius: 'var(--r-md)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff' }}>
-                  <CalcIcon size={20} />
-                </div>
-                <div>
-                  <p style={{ fontWeight: 700, color: 'var(--text-1)', fontSize: '1rem' }}>Calculator</p>
-                  <p style={{ fontSize: '0.82rem', color: 'var(--text-3)' }}>Quickly calculate budgets & splits</p>
-                </div>
-                <ArrowRight size={20} color="var(--accent)" style={{ marginLeft: 'auto' }} />
+          {/* Expense Categories Chart (Hoisted for mobile ordering) */}
+          <Link to="/analytics" style={{ textDecoration: 'none' }} className="dashboard-chart-card">
+            <div className="card fade-up" style={{ cursor: 'pointer' }}>
+              <div className="section-header">
+                <span className="section-title">Expense Categories</span>
+                <PieIcon size={16} color="var(--text-3)" />
+              </div>
+              <div style={{ height: 220, width: '100%', marginTop: 10 }}>
+                {d.categoryData?.length > 0 ? (
+                  <ResponsiveContainer width="100%" height="100%">
+                    <PieChart>
+                      <Pie
+                        data={d.categoryData}
+                        innerRadius={60}
+                        outerRadius={85}
+                        paddingAngle={5}
+                        dataKey="value"
+                        fill="#8884d8"
+                      >
+                        {d.categoryData.map((entry, index) => (
+                          <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} stroke="none" />
+                        ))}
+                      </Pie>
+                      <Tooltip 
+                        formatter={(val) => fmt(val)}
+                        contentStyle={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--r-md)', fontSize: '0.75rem', boxShadow: 'var(--shadow-lg)' }}
+                      />
+                      <text x="50%" y="50%" textAnchor="middle" dominantBaseline="middle">
+                        <tspan x="50%" dy="-0.5em" style={{ fontSize: '0.65rem', fontWeight: 600, fill: 'var(--text-3)', textTransform: 'uppercase' }}>Total</tspan>
+                        <tspan x="50%" dy="1.4em" style={{ fontSize: '1.1rem', fontWeight: 800, fill: 'var(--text-1)' }}>{fmt(d.monthlyExpense)}</tspan>
+                      </text>
+                    </PieChart>
+                  </ResponsiveContainer>
+                ) : (
+                  <div className="empty-state" style={{ padding: '20px' }}>
+                    <p style={{ fontSize: '0.8rem' }}>No expenses yet</p>
+                  </div>
+                )}
               </div>
             </div>
           </Link>
 
-          {/* Notes Shortcut Card */}
-          <Link to="/notes" style={{ textDecoration: 'none' }}>
-            <div className="card fade-up" style={{ border: '1px solid var(--border)', background: 'var(--bg-surface)', cursor: 'pointer', padding: '12px 16px' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                <div style={{ width: 36, height: 36, background: 'var(--accent-dim)', borderRadius: 'var(--r-md)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--accent)' }}>
-                  <StickyNote size={20} />
-                </div>
-                <div>
-                  <p style={{ fontWeight: 700, color: 'var(--text-1)', fontSize: '1rem' }}>Notes</p>
-                  <p style={{ fontSize: '0.82rem', color: 'var(--text-3)' }}>Note down your daily reminders</p>
-                </div>
-                <ArrowRight size={20} color="var(--text-3)" style={{ marginLeft: 'auto' }} />
-              </div>
-            </div>
-          </Link>
-
-          {/* Account balances */}
-          <div className="card fade-up">
-            <div className="section-header">
-              <span className="section-title">Accounts</span>
-              <Link to="/accounts" className="btn btn-secondary btn-sm">
-                Manage <ArrowRight size={13} />
-              </Link>
-            </div>
-            {!d.accounts?.length ? (
-              <div className="empty-state" style={{ padding: '24px' }}>
-                <p>No accounts yet</p>
-              </div>
-            ) : (
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                {d.accounts.map((acc) => (
-                  <div key={acc._id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '8px 12px', background: 'var(--bg-elevated)', borderRadius: 'var(--r-md)' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                      <div style={{ width: 10, height: 10, borderRadius: '50%', background: acc.color || 'var(--accent)' }} />
-                      <span style={{ fontSize: '0.88rem', fontWeight: 600, color: 'var(--text-1)' }}>{acc.name}</span>
-                    </div>
-                    <span style={{ fontSize: '0.9rem', fontWeight: 700, color: 'var(--text-1)' }}>{fmt(acc.balance)}</span>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-
-          {/* Upcoming Bills */}
-          <div className="card fade-up">
-            <div className="section-header">
-              <span className="section-title">Upcoming Bills</span>
-              <Link to="/bills" className="btn btn-secondary btn-sm">
-                View all <ArrowRight size={13} />
-              </Link>
-            </div>
-            {!d.upcomingBills?.length ? (
-              <div className="empty-state" style={{ padding: '24px' }}>
-                <p>No upcoming bills 🎉</p>
-              </div>
-            ) : (
-              d.upcomingBills.map((bill) => {
-                const daysLeft = Math.ceil((new Date(bill.dueDate) - Date.now()) / 86400000);
-                return (
-                  <div key={bill._id} className={`bill-item ${daysLeft <= 2 ? 'bill-due-soon' : ''}`}>
-                    <Receipt size={16} color="var(--warning)" style={{ flexShrink: 0 }} />
-                    <div style={{ flex: 1, minWidth: 0 }}>
-                      <p style={{ fontWeight: 600, color: 'var(--text-1)', fontSize: '0.88rem' }}>{bill.name}</p>
-                      <p style={{ fontSize: '0.75rem', color: 'var(--text-3)' }}>Due {fmtDate(bill.dueDate)} · {daysLeft}d left</p>
-                    </div>
-                    <span style={{ fontWeight: 700, color: 'var(--warning)', fontSize: '0.9rem' }}>{fmt(bill.amount)}</span>
-                  </div>
-                );
-              })
-            )}
-          </div>
-
-          {/* Unsettled splits teaser */}
-          {d.unsettledSplitsCount > 0 && (
-            <Link to="/splits" style={{ textDecoration: 'none' }}>
-              <div className="card fade-up" style={{ border: '1px solid rgba(99,102,241,0.3)', background: 'var(--accent-dim)', cursor: 'pointer' }}>
+          {/* Right column */}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+            {/* Calculator Shortcut Card */}
+            <Link to="/calculator" style={{ textDecoration: 'none' }}>
+              <div className="card fade-up desktop-only" style={{ border: '1px solid var(--accent-light)', background: 'linear-gradient(135deg, var(--bg-surface), var(--accent-dim))', cursor: 'pointer', padding: '12px 16px' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                  <Users size={20} color="var(--accent-light)" />
-                  <div>
-                    <p style={{ fontWeight: 700, color: 'var(--accent-light)' }}>{d.unsettledSplitsCount} unsettled split{d.unsettledSplitsCount > 1 ? 's' : ''}</p>
-                    <p style={{ fontSize: '0.78rem', color: 'var(--text-3)' }}>Tap to view and settle</p>
+                  <div style={{ width: 36, height: 36, background: 'var(--accent)', borderRadius: 'var(--r-md)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff' }}>
+                    <CalcIcon size={20} />
                   </div>
-                  <ArrowRight size={16} color="var(--accent-light)" style={{ marginLeft: 'auto' }} />
+                  <div>
+                    <p style={{ fontWeight: 700, color: 'var(--text-1)', fontSize: '1rem' }}>Calculator</p>
+                    <p style={{ fontSize: '0.82rem', color: 'var(--text-3)' }}>Quickly calculate budgets & splits</p>
+                  </div>
+                  <ArrowRight size={20} color="var(--accent)" style={{ marginLeft: 'auto' }} />
                 </div>
               </div>
             </Link>
-          )}
+
+            {/* Notes Shortcut Card */}
+            <Link to="/notes" style={{ textDecoration: 'none' }}>
+              <div className="card fade-up" style={{ border: '1px solid var(--border)', background: 'var(--bg-surface)', cursor: 'pointer', padding: '12px 16px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                  <div style={{ width: 36, height: 36, background: 'var(--accent-dim)', borderRadius: 'var(--r-md)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--accent)' }}>
+                    <StickyNote size={20} />
+                  </div>
+                  <div>
+                    <p style={{ fontWeight: 700, color: 'var(--text-1)', fontSize: '1rem' }}>Notes</p>
+                    <p style={{ fontSize: '0.82rem', color: 'var(--text-3)' }}>Note down your daily reminders</p>
+                  </div>
+                  <ArrowRight size={20} color="var(--text-3)" style={{ marginLeft: 'auto' }} />
+                </div>
+              </div>
+            </Link>
+
+            {/* Account balances */}
+            <div className="card fade-up">
+              <div className="section-header">
+                <span className="section-title">Accounts</span>
+                <Link to="/accounts" className="btn btn-secondary btn-sm">
+                  Manage <ArrowRight size={13} />
+                </Link>
+              </div>
+              {!d.accounts?.length ? (
+                <div className="empty-state" style={{ padding: '24px' }}>
+                  <p>No accounts yet</p>
+                </div>
+              ) : (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                  {d.accounts.map((acc) => (
+                    <div key={acc._id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '8px 12px', background: 'var(--bg-elevated)', borderRadius: 'var(--r-md)' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        <div style={{ width: 10, height: 10, borderRadius: '50%', background: acc.color || 'var(--accent)' }} />
+                        <span style={{ fontSize: '0.88rem', fontWeight: 600, color: 'var(--text-1)' }}>{acc.name}</span>
+                      </div>
+                      <span style={{ fontSize: '0.9rem', fontWeight: 700, color: 'var(--text-1)' }}>{fmt(acc.balance)}</span>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {/* Upcoming Bills */}
+            <div className="card fade-up">
+              <div className="section-header">
+                <span className="section-title">Upcoming Bills</span>
+                <Link to="/bills" className="btn btn-secondary btn-sm">
+                  View all <ArrowRight size={13} />
+                </Link>
+              </div>
+              {!d.upcomingBills?.length ? (
+                <div className="empty-state" style={{ padding: '24px' }}>
+                  <p>No upcoming bills 🎉</p>
+                </div>
+              ) : (
+                d.upcomingBills.map((bill) => {
+                  const daysLeft = Math.ceil((new Date(bill.dueDate) - Date.now()) / 86400000);
+                  return (
+                    <div key={bill._id} className={`bill-item ${daysLeft <= 2 ? 'bill-due-soon' : ''}`}>
+                      <Receipt size={16} color="var(--warning)" style={{ flexShrink: 0 }} />
+                      <div style={{ flex: 1, minWidth: 0 }}>
+                        <p style={{ fontWeight: 600, color: 'var(--text-1)', fontSize: '0.88rem' }}>{bill.name}</p>
+                        <p style={{ fontSize: '0.75rem', color: 'var(--text-3)' }}>Due {fmtDate(bill.dueDate)} · {daysLeft}d left</p>
+                      </div>
+                      <span style={{ fontWeight: 700, color: 'var(--warning)', fontSize: '0.9rem' }}>{fmt(bill.amount)}</span>
+                    </div>
+                  );
+                })
+              )}
+            </div>
+
+            {/* Unsettled splits teaser */}
+            {d.unsettledSplitsCount > 0 && (
+              <Link to="/splits" style={{ textDecoration: 'none' }}>
+                <div className="card fade-up" style={{ border: '1px solid rgba(99,102,241,0.3)', background: 'var(--accent-dim)', cursor: 'pointer' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                    <Users size={20} color="var(--accent-light)" />
+                    <div>
+                      <p style={{ fontWeight: 700, color: 'var(--accent-light)' }}>{d.unsettledSplitsCount} unsettled split{d.unsettledSplitsCount > 1 ? 's' : ''}</p>
+                      <p style={{ fontSize: '0.78rem', color: 'var(--text-3)' }}>Tap to view and settle</p>
+                    </div>
+                    <ArrowRight size={16} color="var(--accent-light)" style={{ marginLeft: 'auto' }} />
+                  </div>
+                </div>
+              </Link>
+            )}
+          </div>
         </div>
-      </div>
 
       <style>{`
         .spin-once { animation: spin 0.7s linear; }
