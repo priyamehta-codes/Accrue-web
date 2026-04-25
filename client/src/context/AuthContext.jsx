@@ -9,6 +9,7 @@ export const AuthProvider = ({ children }) => {
   });
   const [token, setToken] = useState(() => localStorage.getItem('accrue_token'));
   const [loading, setLoading] = useState(true);
+  const [isUnlocked, setUnlocked] = useState(false);
 
   // Verify stored token on mount
   useEffect(() => {
@@ -52,6 +53,7 @@ export const AuthProvider = ({ children }) => {
       .forEach((k) => localStorage.removeItem(k));
     setToken(null);
     setUser(null);
+    setUnlocked(false);
   }, []);
 
   const updateUser = useCallback((updatedUser) => {
@@ -62,6 +64,7 @@ export const AuthProvider = ({ children }) => {
   return (
     <AuthContext.Provider value={{ 
       user, token, loading, login, logout, updateUser,
+      isUnlocked, setUnlocked,
       isAuthenticated: !!token 
     }}>
       {children}
