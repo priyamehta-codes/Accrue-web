@@ -131,7 +131,7 @@ const Bills = () => {
                   <button
                     className={`btn-reminder-toggle ${isReminder ? 'active' : ''}`}
                     onClick={() => handleToggleReminder(bill)}
-                    disabled={isToggling || bill.isPaid}
+                    disabled={isToggling}
                     title={isReminder ? 'Remove monthly reminder' : 'Set as monthly reminder'}
                   >
                     {isReminder
